@@ -1,0 +1,192 @@
+.analytics-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    animation: fadeIn 0.8s ease;
+    width: 100%;
+}
+
+.analytics-header {
+    padding: 2rem;
+    background: var(--glass-bg);
+    border: var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+}
+
+.analytics-header h2 {
+    font-size: 2rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 0.5rem 0;
+}
+
+.analytics-header p {
+    color: var(--color-silver-dark);
+    margin: 0;
+}
+
+/* Highlights Section */
+.highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.highlight-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.8rem;
+    background: var(--glass-bg);
+    border: var(--glass-border);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.highlight-card:hover {
+    transform: translateY(-5px);
+}
+
+.influencer-highlight {
+    border-bottom: 3px solid var(--color-purple-light);
+}
+
+.influencer-highlight:hover {
+    box-shadow: 0 8px 30px rgba(157, 78, 221, 0.2);
+}
+
+.ad-highlight {
+    border-bottom: 3px solid var(--color-teal);
+}
+
+.ad-highlight:hover {
+    box-shadow: 0 8px 30px rgba(0, 180, 216, 0.2);
+}
+
+.highlight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.highlight-icon {
+    font-size: 2.5rem;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.highlight-info h4 {
+    font-size: 0.95rem;
+    color: var(--color-silver-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+}
+
+.highlight-info h3 {
+    font-size: 1.5rem;
+    color: var(--color-silver-light);
+    margin-bottom: 0.8rem;
+}
+
+.highlight-stats {
+    display: flex;
+    gap: 1.2rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.influencer-highlight .highlight-stats span {
+    color: var(--color-purple-light);
+    background: rgba(157, 78, 221, 0.1);
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+}
+
+.ad-highlight .highlight-stats span {
+    color: var(--color-teal);
+    background: rgba(0, 180, 216, 0.1);
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+}
+
+/* Charts Section */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 1200px) {
+    .charts-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.chart-card {
+    background: var(--glass-bg);
+    border: var(--glass-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+}
+
+.chart-card h3 {
+    font-size: 1.2rem;
+    color: var(--color-silver-light);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.chart-wrapper {
+    height: 350px;
+    width: 100%;
+}
+
+/* Custom Recharts Tooltip */
+.custom-tooltip {
+    background: rgba(18, 18, 18, 0.9) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.tooltip-label {
+    color: var(--color-silver-light);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.3rem;
+}
+
+/* Recharts overrides for better visibility */
+.recharts-legend-item-text {
+    color: var(--color-silver) !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+}

@@ -1,0 +1,301 @@
+.collaboration-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    animation: fadeIn 0.8s ease;
+    width: 100%;
+}
+
+.collaboration-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: var(--glass-bg);
+    border: var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+}
+
+.header-titles h2 {
+    font-size: 2rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 0.5rem 0;
+}
+
+.header-titles p {
+    color: var(--color-silver-dark);
+    margin: 0;
+}
+
+.create-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.8rem;
+    font-size: 1rem;
+}
+
+.create-btn span {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Table Styles */
+.table-container {
+    background: var(--glass-bg);
+    border: var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+    overflow-x: auto;
+}
+
+.collab-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.collab-table th {
+    padding: 1.2rem 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--color-silver-light);
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.collab-table td {
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--color-silver);
+    transition: background 0.3s ease;
+}
+
+.collab-table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.collab-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.ad-name {
+    font-weight: 500;
+    color: var(--color-silver-light) !important;
+}
+
+/* Badges and Pills */
+.assigned-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.assigned-badge.unassigned {
+    background: rgba(255, 255, 255, 0.1);
+    color: #adb5bd;
+}
+
+.assigned-badge.assigned {
+    background: rgba(157, 78, 221, 0.15);
+    color: var(--color-purple-light);
+    border: 1px solid rgba(157, 78, 221, 0.3);
+}
+
+.status-pill {
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-pill.open {
+    background: rgba(0, 180, 216, 0.15);
+    color: var(--color-teal-light);
+    border: 1px solid rgba(0, 180, 216, 0.3);
+}
+
+.status-pill.assigned {
+    background: rgba(0, 230, 118, 0.15);
+    color: #00e676;
+    border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.status-pill.in-progress {
+    background: rgba(255, 171, 0, 0.15);
+    color: #ffab00;
+    border: 1px solid rgba(255, 171, 0, 0.3);
+}
+
+/* Action Buttons */
+.apply-btn {
+    background: transparent;
+    color: var(--color-teal);
+    border: 1px solid var(--color-teal);
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.apply-btn:hover:not(.disabled) {
+    background: rgba(0, 180, 216, 0.1);
+    box-shadow: 0 0 10px rgba(0, 180, 216, 0.3);
+}
+
+.apply-btn.disabled {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.3);
+    cursor: not-allowed;
+}
+
+/* Modals */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: var(--color-dark-surface);
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(157, 78, 221, 0.2);
+    overflow: hidden;
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--color-silver-light);
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-silver);
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+    color: #ff4d4d;
+}
+
+.modal-form {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-silver);
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--color-silver-light);
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.form-group input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-teal);
+    box-shadow: 0 0 10px rgba(0, 180, 216, 0.2);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.secondary-btn {
+    background: transparent;
+    color: var(--color-silver);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-silver);
+}
+
+@media (max-width: 768px) {
+    .collaboration-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .create-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
