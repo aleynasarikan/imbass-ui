@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5002/api',
+    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5002/api',
     withCredentials: true // Important for sending/receiving cookies (refresh token)
 });
 
@@ -29,7 +29,8 @@ api.interceptors.response.use(
 
             try {
                 // Attempt to get a new access token using the HttpOnly refresh token cookie
-                const res = await axios.post('http://localhost:5002/api/auth/refresh', {}, {
+                const apiURL = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
+                const res = await axios.post(`${apiURL}/auth/refresh`, {}, {
                     withCredentials: true // Must send cookies
                 });
 
