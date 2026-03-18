@@ -14,10 +14,27 @@ const analyticsRoutes_1 = __importDefault(require("./routes/analyticsRoutes"));
 const dataRoutes_1 = __importDefault(require("./routes/dataRoutes"));
 const error_1 = require("./middleware/error");
 const app = (0, express_1.default)();
-const PORT = process.env.SERVER_PORT || 5002;
+const PORT = process.env.PORT || process.env.SERVER_PORT || 5002;
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:3001', // Backup ports if 3000 is occupied
+    'http://localhost:5173', // Default for Vite
+    process.env.FRONTEND_URL
+].filter(Boolean);
 // Middleware
 app.use((0, cors_1.default)({
-    origin: 'http://localhost:3000', // React default is 3000
+    origin: (origin, callback) => {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin)
+            return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true // Allow receiving cookies
 }));
 app.use(express_1.default.json());
