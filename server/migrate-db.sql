@@ -48,13 +48,15 @@ CREATE TABLE profiles(
     location TEXT,
     contact_email TEXT,
     avatar_url TEXT,
+    company_name TEXT,
+    logo_url TEXT,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE platforms(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    platform_name TEXT NOT NULL CHECK(platform_name IN('YOUTUBE', 'INSTAGRAM', 'TIKTOK')),
+    platform_name TEXT NOT NULL,
     username TEXT NOT NULL,
     follower_count BIGINT DEFAULT 0 CHECK(follower_count >= 0),
     profile_link TEXT,

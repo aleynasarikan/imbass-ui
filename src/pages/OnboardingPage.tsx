@@ -86,7 +86,7 @@ const OnboardingPage: React.FC = () => {
                     .map(([platform, value]) => ({
                         platform,
                         username: value.trim(),
-                        profileUrl: value.trim().startsWith('http') ? value.trim() : null,
+                        profileUrl: value.trim().startsWith('http') ? value.trim() : "",
                     }));
 
                 await api.post('/onboarding/influencer', { username: username.trim(), socialAccounts: accounts });

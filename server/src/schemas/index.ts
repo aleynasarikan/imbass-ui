@@ -33,9 +33,12 @@ export const influencerOnboardingSchema = z.object({
   body: z.object({
     username: z.string().min(1, 'Username is required'),
     socialAccounts: z.array(z.object({
-      platform: z.enum(['YOUTUBE', 'INSTAGRAM', 'TIKTOK', 'youtube', 'instagram', 'tiktok']),
+      platform: z.enum([
+        'YOUTUBE', 'INSTAGRAM', 'TIKTOK', 'TWITTER', 'TWITCH', 'STEAM', 'OTHER',
+        'youtube', 'instagram', 'tiktok', 'twitter', 'twitch', 'steam', 'other'
+      ]),
       username: z.string().min(1, 'Platform username is required'),
-      profileUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+      profileUrl: z.string().optional().or(z.literal('')).or(z.null()),
     })).optional(),
   }),
 });
@@ -43,6 +46,6 @@ export const influencerOnboardingSchema = z.object({
 export const agencyOnboardingSchema = z.object({
   body: z.object({
     companyName: z.string().min(1, 'Company name is required'),
-    logoUrl: z.string().url('Invalid Logo URL').optional().or(z.literal('')),
+    logoUrl: z.string().optional().or(z.literal('')).or(z.null()),
   }),
 });
