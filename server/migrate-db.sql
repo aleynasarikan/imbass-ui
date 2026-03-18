@@ -53,13 +53,13 @@ CREATE TABLE profiles(
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE platforms(
+CREATE TABLE social_accounts(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    platform_name TEXT NOT NULL,
+    platform TEXT NOT NULL,
     username TEXT NOT NULL,
     follower_count BIGINT DEFAULT 0 CHECK(follower_count >= 0),
-    profile_link TEXT,
+    profile_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
