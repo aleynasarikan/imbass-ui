@@ -16,7 +16,7 @@ const getInfluencers = async () => {
     WHERE users.role = 'INFLUENCER'
   `);
     const influencers = result.rows;
-    return influencers.map(inf => ({
+    return influencers.map((inf) => ({
         ...inf,
         followers: inf.followers > 1000000
             ? `${(inf.followers / 1000000).toFixed(1)}M`

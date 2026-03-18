@@ -19,7 +19,7 @@ const getWeeklyAnalytics = async () => {
   `;
     const influencerResult = await (0, db_1.query)(influencerQuery);
     const influencerPerformancesRaw = influencerResult.rows;
-    const influencerPerformances = influencerPerformancesRaw.map(inf => ({
+    const influencerPerformances = influencerPerformancesRaw.map((inf) => ({
         name: inf.name,
         reach: Math.round(Number(inf.total_reach) / 1000),
         engagement: Math.round(Number(inf.total_engagement) / 1000)

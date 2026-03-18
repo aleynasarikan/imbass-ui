@@ -16,9 +16,9 @@ export const getMyProfile = async (userId: string) => {
   const platforms = platformsResult.rows;
 
   const platformsObj = {
-    youtube: platforms.some(p => p.platform_name === 'YOUTUBE'),
-    instagram: platforms.some(p => p.platform_name === 'INSTAGRAM'),
-    tiktok: platforms.some(p => p.platform_name === 'TIKTOK')
+    youtube: platforms.some((p: any) => p.platform_name === 'YOUTUBE'),
+    instagram: platforms.some((p: any) => p.platform_name === 'INSTAGRAM'),
+    tiktok: platforms.some((p: any) => p.platform_name === 'TIKTOK')
   };
 
   return {

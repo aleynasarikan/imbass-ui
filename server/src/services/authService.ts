@@ -100,7 +100,7 @@ export const refreshUserToken = async (token: string): Promise<string> => {
   }
 
   return new Promise((resolve, reject) => {
-    jwt.verify(token, process.env.REFRESH_TOKEN_SECRET as string, (err, decoded) => {
+    jwt.verify(token, process.env.REFRESH_TOKEN_SECRET as string, (err: any, decoded: any) => {
       if (err || (decoded as any).id !== user.id) {
         return reject({ statusCode: 403, message: 'Token verification failed' });
       }

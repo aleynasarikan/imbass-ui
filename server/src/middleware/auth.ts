@@ -10,7 +10,7 @@ export const requireAuth = (req: AuthenticatedRequest, res: Response, next: Next
     return res.status(401).json({ message: 'Access Denied: No Token Provided' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET as string, (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET as string, (err: any, decoded: any) => {
     if (err) {
       return res.status(403).json({ message: 'Access Denied: Invalid Token' });
     }

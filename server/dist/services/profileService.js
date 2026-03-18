@@ -11,9 +11,9 @@ const getMyProfile = async (userId) => {
     const platformsResult = await (0, db_1.query)('SELECT * FROM platforms WHERE profile_id = $1', [profile.id]);
     const platforms = platformsResult.rows;
     const platformsObj = {
-        youtube: platforms.some(p => p.platform_name === 'YOUTUBE'),
-        instagram: platforms.some(p => p.platform_name === 'INSTAGRAM'),
-        tiktok: platforms.some(p => p.platform_name === 'TIKTOK')
+        youtube: platforms.some((p) => p.platform_name === 'YOUTUBE'),
+        instagram: platforms.some((p) => p.platform_name === 'INSTAGRAM'),
+        tiktok: platforms.some((p) => p.platform_name === 'TIKTOK')
     };
     return {
         name: profile.full_name,
