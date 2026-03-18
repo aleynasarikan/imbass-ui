@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-    LineChart, Line, Legend, TooltipProps, TooltipContentProps
+    LineChart, Line, Legend
 } from 'recharts';
-import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import './WeeklyAnalytics.css';
 import api from '../api';
 

@@ -6,7 +6,6 @@ interface EnterpriseSidebarProps {
   setActivePage: (page: string) => void;
 }
 
-const EnterpriseSidebarLabel = ({ label }: { label: string }) => <span>{label}</span>;
 
 const EnterpriseSidebar: React.FC<EnterpriseSidebarProps> = ({ activePage, setActivePage }) => {
   const menuItems = [
