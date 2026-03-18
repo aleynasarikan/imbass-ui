@@ -1,7 +1,13 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
+let apiBaseURL = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
+// Ensure the base URL ends with /api if users forget it in their environment variable
+if (apiBaseURL !== 'http://localhost:5002/api' && !apiBaseURL.endsWith('/api')) {
+    apiBaseURL = apiBaseURL.endsWith('/') ? `${apiBaseURL}api` : `${apiBaseURL}/api`;
+}
+
 const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5002/api',
+    baseURL: apiBaseURL,
     withCredentials: true // Important for sending/receiving cookies (refresh token)
 });
 
@@ -29,8 +35,7 @@ api.interceptors.response.use(
 
             try {
                 // Attempt to get a new access token using the HttpOnly refresh token cookie
-                const apiURL = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
-                const res = await axios.post(`${apiURL}/auth/refresh`, {}, {
+                const res = await axios.post(`${apiBaseURL}/auth/refresh`, {}, {
                     withCredentials: true // Must send cookies
                 });
 
