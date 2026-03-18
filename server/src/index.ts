@@ -12,7 +12,7 @@ import dataRoutes from './routes/dataRoutes';
 import { errorHandler } from './middleware/error';
 
 const app = express();
-const PORT = process.env.SERVER_PORT || 5002;
+const PORT = process.env.PORT || process.env.SERVER_PORT || 5002;
 
 const allowedOrigins = [
   'http://localhost:3000',
