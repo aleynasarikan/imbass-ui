@@ -35,6 +35,7 @@ CREATE TABLE users(
     password_hash TEXT NOT NULL,
     role user_role NOT NULL,
     refresh_token TEXT,
+    is_onboarding BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

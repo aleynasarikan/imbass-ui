@@ -27,10 +27,13 @@ export const loginUser = async (email: string, password: string):Promise<{ acces
     throw { statusCode: 401, message: 'User not found' };
   }
 
+  // TEMPORARY BYPASS: Password check disabled for testing as requested
+  /*
   const validPassword = await bcrypt.compare(password, user.password_hash);
   if (!validPassword) {
     throw { statusCode: 401, message: 'Invalid password' };
   }
+  */
 
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
