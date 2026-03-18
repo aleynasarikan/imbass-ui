@@ -44,6 +44,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root / Health Check
+app.get('/', (req, res) => {
+  res.json({ message: 'IMBASS API is running', version: '1.0.0' });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);

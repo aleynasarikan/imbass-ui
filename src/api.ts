@@ -1,9 +1,23 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-let apiBaseURL = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
-// Ensure the base URL ends with /api if users forget it in their environment variable
-if (apiBaseURL !== 'http://localhost:5002/api' && !apiBaseURL.endsWith('/api')) {
-    apiBaseURL = apiBaseURL.endsWith('/') ? `${apiBaseURL}api` : `${apiBaseURL}/api`;
+let apiBaseURL = (process.env.REACT_APP_API_URL || '').trim();
+
+if (!apiBaseURL) {
+    // If no URL is provided, default to localhost for development
+    apiBaseURL = 'http://localhost:5002/api';
+} else {
+    // Ensure the URL starts with http:// or https://
+    if (!apiBaseURL.startsWith('http://') && !apiBaseURL.startsWith('https://')) {
+        apiBaseURL = 'https://' + apiBaseURL;
+    }
+    
+    // Ensure it ends with /api but remove trailing slash before check
+    const normalized = apiBaseURL.endsWith('/') ? apiBaseURL.slice(0, -1) : apiBaseURL;
+    if (!normalized.endsWith('/api')) {
+        apiBaseURL = normalized + '/api';
+    } else {
+        apiBaseURL = normalized;
+    }
 }
 
 const api = axios.create({
