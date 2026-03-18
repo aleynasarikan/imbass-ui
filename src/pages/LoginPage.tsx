@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
-const LoginPage = ({ onSwitchToRegister }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+interface LoginPageProps {
+    onSwitchToRegister: () => void;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [error, setError] = useState<string>('');
     const { login } = useAuth();
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
         try {
             await login(email, password);
             // AuthContext updates user state → App.js handles routing
-        } catch (err) {
+        } catch (err: any) {
             setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
         }
     };

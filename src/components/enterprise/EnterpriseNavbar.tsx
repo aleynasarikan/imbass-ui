@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../styles/enterprise.css';
 
-const EnterpriseNavbar = () => {
+const EnterpriseNavbar: React.FC = () => {
     return (
         <header className="enterprise-navbar">
             <div className="navbar-content">

@@ -1,18 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import './ProfilePage.css';
 import api from '../api';
 
-const ProfilePage = () => {
-    const [profile, setProfile] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editForm, setEditForm] = useState(null);
-    const [loading, setLoading] = useState(true);
+interface ProfileData {
+    id: string;
+    userId: string;
+    name: string;
+    email: string;
+    role: string;
+    bio?: string;
+    location?: string;
+    contactEmail?: string;
+    platforms?: {
+        youtube?: boolean;
+        instagram?: boolean;
+        tiktok?: boolean;
+    };
+}
+
+const ProfilePage: React.FC = () => {
+    const [profile, setProfile] = useState<ProfileData | null>(null);
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [editForm, setEditForm] = useState<ProfileData | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
     // Fetch Profile from DB over Protected Route
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await api.get('/profile/me');
+                const res = await api.get<ProfileData>('/profile/me');
                 setProfile(res.data);
                 setEditForm(res.data);
             } catch (err) {
@@ -24,26 +40,31 @@ const ProfilePage = () => {
         fetchProfile();
     }, []);
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setEditForm({
-            ...editForm,
-            [name]: value
-        });
+        if (editForm) {
+            setEditForm({
+                ...editForm,
+                [name]: value
+            });
+        }
     };
 
-    const handlePlatformChange = (platform) => {
-        setEditForm({
-            ...editForm,
-            platforms: {
-                ...editForm.platforms,
-                [platform]: !editForm.platforms[platform]
-            }
-        });
+    const handlePlatformChange = (platform: keyof NonNullable<ProfileData['platforms']>) => {
+        if (editForm) {
+            setEditForm({
+                ...editForm,
+                platforms: {
+                    ...editForm.platforms,
+                    [platform]: !editForm.platforms?.[platform]
+                }
+            });
+        }
     };
 
-    const handleSave = async (e) => {
+    const handleSave = async (e: FormEvent) => {
         e.preventDefault();
+        if (!editForm) return;
         try {
             await api.put('/profile/me', editForm);
             setProfile(editForm);
@@ -60,7 +81,7 @@ const ProfilePage = () => {
     };
 
     if (loading) return <div style={{ padding: '50px', textAlign: 'center' }}>Loading Profile...</div>;
-    if (!profile) return <div style={{ padding: '50px', textAlign: 'center' }}>Could not load profile. Ensure you are logged in.</div>;
+    if (!profile || !editForm) return <div style={{ padding: '50px', textAlign: 'center' }}>Could not load profile. Ensure you are logged in.</div>;
 
     return (
         <div className="profile-container">
@@ -115,7 +136,7 @@ const ProfilePage = () => {
                                     value={editForm.bio || ''}
                                     onChange={handleInputChange}
                                     className="edit-textarea"
-                                    rows="4"
+                                    rows={4}
                                 />
                             ) : (
                                 <p>{profile.bio || 'No bio provided.'}</p>

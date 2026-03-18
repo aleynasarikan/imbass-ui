@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './RegisterPage.css';
 
-const RegisterPage = ({ onSwitchToLogin }) => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState('');
-    const [error, setError] = useState('');
-    const [fieldErrors, setFieldErrors] = useState({});
-    const [loading, setLoading] = useState(false);
+interface RegisterPageProps {
+    onSwitchToLogin: () => void;
+}
+
+interface FieldErrors {
+    email?: string;
+    password?: string;
+    role?: string;
+}
+
+const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [role, setRole] = useState<string>('');
+    const [error, setError] = useState<string>('');
+    const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+    const [loading, setLoading] = useState<boolean>(false);
     const { register } = useAuth();
 
     const validate = () => {
-        const errors = {};
+        const errors: FieldErrors = {};
         if (!email) {
             errors.email = 'Email is required';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -30,7 +40,7 @@ const RegisterPage = ({ onSwitchToLogin }) => {
         return Object.keys(errors).length === 0;
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
         if (!validate()) return;
@@ -39,7 +49,7 @@ const RegisterPage = ({ onSwitchToLogin }) => {
         try {
             await register({ email, password, role });
             // AuthContext will handle state update and App.js will redirect to onboarding
-        } catch (err) {
+        } catch (err: any) {
             setError(err.response?.data?.message || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
@@ -63,14 +73,14 @@ const RegisterPage = ({ onSwitchToLogin }) => {
                 <div className="role-selector">
                     <div
                         className={`role-option ${role === 'INFLUENCER' ? 'selected' : ''}`}
-                        onClick={() => { setRole('INFLUENCER'); setFieldErrors(prev => ({ ...prev, role: '' })); }}
+                        onClick={() => { setRole('INFLUENCER'); setFieldErrors(prev => ({ ...prev, role: undefined })); }}
                     >
                         <span className="role-icon">🎬</span>
                         <span>Influencer</span>
                     </div>
                     <div
                         className={`role-option ${role === 'AGENCY' ? 'selected' : ''}`}
-                        onClick={() => { setRole('AGENCY'); setFieldErrors(prev => ({ ...prev, role: '' })); }}
+                        onClick={() => { setRole('AGENCY'); setFieldErrors(prev => ({ ...prev, role: undefined })); }}
                     >
                         <span className="role-icon">🏢</span>
                         <span>Agency</span>
@@ -84,7 +94,7 @@ const RegisterPage = ({ onSwitchToLogin }) => {
                         <input
                             type="email"
                             value={email}
-                            onChange={(e) => { setEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: '' })); }}
+                            onChange={(e) => { setEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: undefined })); }}
                             className={fieldErrors.email ? 'invalid' : ''}
                             placeholder="you@example.com"
                         />
@@ -96,7 +106,7 @@ const RegisterPage = ({ onSwitchToLogin }) => {
                         <input
                             type="password"
                             value={password}
-                            onChange={(e) => { setPassword(e.target.value); setFieldErrors(prev => ({ ...prev, password: '' })); }}
+                            onChange={(e) => { setPassword(e.target.value); setFieldErrors(prev => ({ ...prev, password: undefined })); }}
                             className={fieldErrors.password ? 'invalid' : ''}
                             placeholder="Minimum 6 characters"
                         />

@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, ChangeEvent, DragEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
 import './OnboardingPage.css';
 
 /* ─── Social Media SVG Icons ─── */
-const SocialIcons = {
+const SocialIcons: Record<string, React.ReactNode> = {
     twitter: (
         <svg viewBox="0 0 24 24" fill="#1DA1F2"><path d="M23.643 4.937c-.835.37-1.732.62-2.675.733a4.67 4.67 0 002.048-2.578 9.3 9.3 0 01-2.958 1.13 4.66 4.66 0 00-7.938 4.25 13.229 13.229 0 01-9.602-4.868c-.4.69-.63 1.49-.63 2.342A4.66 4.66 0 003.96 9.824a4.647 4.647 0 01-2.11-.583v.06a4.66 4.66 0 003.737 4.568 4.692 4.692 0 01-2.104.08 4.661 4.661 0 004.352 3.234 9.348 9.348 0 01-5.786 1.995 9.5 9.5 0 01-1.112-.065 13.175 13.175 0 007.14 2.093c8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602a9.47 9.47 0 002.323-2.41l.002-.003z"/></svg>
     ),
@@ -38,35 +38,35 @@ const SOCIAL_PLATFORMS = [
     { key: 'other', label: 'Other', placeholder: 'URL or username' },
 ];
 
-const OnboardingPage = () => {
+const OnboardingPage: React.FC = () => {
     const { user, completeOnboarding } = useAuth();
     const role = user?.role;
     const totalSteps = 2;
 
-    const [step, setStep] = useState(1);
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [step, setStep] = useState<number>(1);
+    const [error, setError] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
 
     // Influencer state
-    const [username, setUsername] = useState('');
-    const [socialAccounts, setSocialAccounts] = useState(
+    const [username, setUsername] = useState<string>('');
+    const [socialAccounts, setSocialAccounts] = useState<Record<string, string>>(
         SOCIAL_PLATFORMS.reduce((acc, p) => ({ ...acc, [p.key]: '' }), {})
     );
 
     // Agency state
-    const [companyName, setCompanyName] = useState('');
-    const [logoPreview, setLogoPreview] = useState(null);
-    const [dragOver, setDragOver] = useState(false);
-    const fileInputRef = useRef(null);
+    const [companyName, setCompanyName] = useState<string>('');
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [dragOver, setDragOver] = useState<boolean>(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     /* ─── Validation ─── */
-    const isStep1Valid = () => {
+    const isStep1Valid = (): boolean => {
         if (role === 'INFLUENCER') return username.trim().length > 0;
         if (role === 'AGENCY') return companyName.trim().length > 0;
         return false;
     };
 
-    const isStep2Valid = () => {
+    const isStep2Valid = (): boolean => {
         if (role === 'INFLUENCER') {
             // At least one social account filled
             return Object.values(socialAccounts).some(v => v.trim().length > 0);
@@ -95,7 +95,7 @@ const OnboardingPage = () => {
             }
 
             completeOnboarding();
-        } catch (err) {
+        } catch (err: any) {
             setError(err.response?.data?.message || 'Onboarding failed. Please try again.');
         } finally {
             setLoading(false);
@@ -103,14 +103,14 @@ const OnboardingPage = () => {
     };
 
     /* ─── Logo Upload Handlers ─── */
-    const handleLogoFile = (file) => {
+    const handleLogoFile = (file: File | null) => {
         if (!file || !file.type.startsWith('image/')) return;
         const reader = new FileReader();
-        reader.onload = (e) => setLogoPreview(e.target.result);
+        reader.onload = (e: any) => setLogoPreview(e.target.result);
         reader.readAsDataURL(file);
     };
 
-    const handleDrop = (e) => {
+    const handleDrop = (e: DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setDragOver(false);
         const file = e.dataTransfer.files[0];
@@ -147,7 +147,7 @@ const OnboardingPage = () => {
                 <input
                     type="text"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
                     placeholder="Your display name"
                     autoFocus
                 />
@@ -166,7 +166,7 @@ const OnboardingPage = () => {
                         <input
                             type="text"
                             value={socialAccounts[key]}
-                            onChange={(e) => setSocialAccounts(prev => ({ ...prev, [key]: e.target.value }))}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => setSocialAccounts(prev => ({ ...prev, [key]: e.target.value }))}
                             placeholder={placeholder}
                             title={label}
                         />
@@ -186,7 +186,7 @@ const OnboardingPage = () => {
                 <input
                     type="text"
                     value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setCompanyName(e.target.value)}
                     placeholder="Acme Marketing Inc."
                     autoFocus
                 />
@@ -208,8 +208,9 @@ const OnboardingPage = () => {
                 <input
                     type="file"
                     accept="image/*"
+                    style={{ display: 'none' }}
                     ref={fileInputRef}
-                    onChange={(e) => handleLogoFile(e.target.files[0])}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleLogoFile(e.target.files ? e.target.files[0] : null)}
                 />
                 {!logoPreview ? (
                     <>

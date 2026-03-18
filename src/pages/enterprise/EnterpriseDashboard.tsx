@@ -2,14 +2,21 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import '../../styles/enterprise.css';
 
-const EnterpriseDashboard = () => {
-    const [influencers, setInfluencers] = useState([]);
-    const [loading, setLoading] = useState(true);
+interface Influencer {
+    id: string;
+    name: string;
+    platform: string;
+    followers: string | number;
+}
+
+const EnterpriseDashboard: React.FC = () => {
+    const [influencers, setInfluencers] = useState<Influencer[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await api.get('/influencers');
+                const res = await api.get<Influencer[]>('/influencers');
                 setInfluencers(res.data);
             } catch (err) {
                 console.error("Error fetching data", err);
@@ -57,10 +64,10 @@ const EnterpriseDashboard = () => {
                     <h3>Creator Roster Liquidity</h3>
                     <div className="table-filters">
                         <select className="select-input">
-                            <all>All Platforms</all>
-                            <option>Instagram</option>
-                            <option>YouTube</option>
-                            <option>TikTok</option>
+                            <option value="all">All Platforms</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="tiktok">TikTok</option>
                         </select>
                     </div>
                 </div>

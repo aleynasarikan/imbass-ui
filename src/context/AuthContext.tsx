@@ -1,11 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '../api';
+import { User, AuthContextType } from '../types';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         // Check if user is logged in on mount
@@ -18,7 +19,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    const login = async (email, password) => {
+    const login = async (email: string, password: unknown): Promise<User> => {
         try {
             const response = await api.post('/auth/login', { email, password });
             const { accessToken, user: userData } = response.data;
@@ -33,7 +34,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = async () => {
+    const logout = async (): Promise<void> => {
         try {
             await api.post('/auth/logout');
         } catch (err) {
@@ -46,9 +47,9 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async ({ email, password, role }) => {
+    const register = async (data: any): Promise<User> => {
         try {
-            const response = await api.post('/auth/register', { email, password, role });
+            const response = await api.post('/auth/register', data);
             const { accessToken, user: userData } = response.data;
 
             localStorage.setItem('accessToken', accessToken);
@@ -62,6 +63,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const completeOnboarding = () => {
+        if (!user) return;
         const updatedUser = { ...user, isOnboarding: false };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         setUser(updatedUser);
@@ -74,4 +76,10 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};

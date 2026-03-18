@@ -2,18 +2,26 @@ import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import api from '../api';
 
-const Dashboard = () => {
-    const [influencers, setInfluencers] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [platformFilter, setPlatformFilter] = useState('All');
-    const [loading, setLoading] = useState(true);
+interface Influencer {
+    id: string;
+    name: string;
+    platform: string;
+    followers: string | number;
+    status: string;
+}
 
-    const platforms = ['All', 'YouTube', 'Instagram', 'TikTok'];
+const Dashboard: React.FC = () => {
+    const [influencers, setInfluencers] = useState<Influencer[]>([]);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [platformFilter, setPlatformFilter] = useState<string>('All');
+    const [loading, setLoading] = useState<boolean>(true);
+
+    const platforms: string[] = ['All', 'YouTube', 'Instagram', 'TikTok'];
 
     useEffect(() => {
         const fetchInfluencers = async () => {
             try {
-                const res = await api.get('/influencers'); // Uses standard token via interceptor
+                const res = await api.get<Influencer[]>('/influencers'); // Uses standard token via interceptor
                 setInfluencers(res.data);
             } catch (err) {
                 console.error("Failed to fetch influencers", err);

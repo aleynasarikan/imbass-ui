@@ -1,7 +1,7 @@
 import React from 'react';
 import './Home.css';
 
-const Home = () => {
+const Home: React.FC = () => {
     return (
         <div className="home-container">
             <header className="home-header">

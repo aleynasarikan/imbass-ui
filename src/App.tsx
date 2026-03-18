@@ -15,12 +15,19 @@ import OnboardingPage from './pages/OnboardingPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './styles/enterprise.css'; // Global inclusion of enterprise tokens
 
-const AppContent = () => {
+declare module 'react' {
+  interface StyleHTMLAttributes<T> extends React.HTMLAttributes<T> {
+    jsx?: boolean;
+    global?: boolean;
+  }
+}
+
+const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activePage, setActivePage] = useState('Home');
-  const [useEnterpriseLayout, setUseEnterpriseLayout] = useState(true);
-  const [showRegister, setShowRegister] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [activePage, setActivePage] = useState<string>('Home');
+  const [useEnterpriseLayout, setUseEnterpriseLayout] = useState<boolean>(true);
+  const [showRegister, setShowRegister] = useState<boolean>(false);
 
   useEffect(() => {
     if (useEnterpriseLayout) {
@@ -56,8 +63,7 @@ const AppContent = () => {
         <EnterpriseSidebar activePage={activePage} setActivePage={setActivePage} />
         <EnterpriseNavbar />
         <main className="enterprise-content">
-          {activePage === 'Home' && <EnterpriseDashboard />}
-          {activePage === 'Dashboard' && <EnterpriseDashboard />}
+          {(activePage === 'Home' || activePage === 'Dashboard') && <EnterpriseDashboard />}
           {activePage === 'Analytics' && <WeeklyAnalytics />}
           {activePage === 'Collaborations' && <AdCollaboration />}
           {activePage === 'Profile' && <ProfilePage />}
@@ -130,7 +136,7 @@ const AppContent = () => {
   );
 };
 
-function App() {
+const App: React.FC = () => {
   return (
     <AuthProvider>
       <AppContent />

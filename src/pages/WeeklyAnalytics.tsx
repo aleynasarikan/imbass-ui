@@ -1,19 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-    LineChart, Line, Legend
+    LineChart, Line, Legend, TooltipProps, TooltipContentProps
 } from 'recharts';
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import './WeeklyAnalytics.css';
 import api from '../api';
 
-const WeeklyAnalytics = () => {
-    const [analyticsData, setAnalyticsData] = useState({ influencers: [], ads: [] });
-    const [loading, setLoading] = useState(true);
+interface InfluencerMetric {
+    name: string;
+    engagement: number;
+    reach: number;
+}
+
+interface AdMetric {
+    name: string;
+    clicks: number;
+    conversions: number;
+}
+
+interface AnalyticsData {
+    influencers: InfluencerMetric[];
+    ads: AdMetric[];
+}
+
+const WeeklyAnalytics: React.FC = () => {
+    const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({ influencers: [], ads: [] });
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
-                const res = await api.get('/analytics/weekly');
+                const res = await api.get<AnalyticsData>('/analytics/weekly');
                 setAnalyticsData(res.data);
             } catch (err) {
                 console.error("Failed to fetch analytics", err);
@@ -30,8 +48,8 @@ const WeeklyAnalytics = () => {
     const hasData = analyticsData.influencers?.length > 0 && analyticsData.ads?.length > 0;
 
     // Logic to find best performers dynamically
-    let bestInfluencer = { name: 'N/A', engagement: 0, reach: 0 };
-    let bestAd = { name: 'N/A', conversions: 0, clicks: 0 };
+    let bestInfluencer: InfluencerMetric = { name: 'N/A', engagement: 0, reach: 0 };
+    let bestAd: AdMetric = { name: 'N/A', conversions: 0, clicks: 0 };
 
     if (hasData) {
         bestInfluencer = analyticsData.influencers.reduce((prev, current) =>
@@ -43,12 +61,12 @@ const WeeklyAnalytics = () => {
         );
     }
 
-    const CustomTooltip = ({ active, payload, label }) => {
+    const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
                 <div className="custom-tooltip">
                     <p className="tooltip-label">{label}</p>
-                    {payload.map((entry, index) => (
+                    {payload.map((entry: any, index: number) => (
                         <p key={`item-${index}`} style={{ color: entry.color }}>
                             {`${entry.name}: ${entry.value}`}
                         </p>
@@ -108,7 +126,7 @@ const WeeklyAnalytics = () => {
                                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                                         <XAxis dataKey="name" stroke="#adb5bd" tick={{ fill: '#adb5bd' }} />
                                         <YAxis stroke="#adb5bd" tick={{ fill: '#adb5bd' }} />
-                                        <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                                        <RechartsTooltip content={CustomTooltip} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
                                         <Legend iconType="circle" />
                                         <Bar dataKey="reach" name="Reach (K)" fill="#9D4EDD" radius={[4, 4, 0, 0]} />
                                         <Bar dataKey="engagement" name="Engagement (K)" fill="#00B4D8" radius={[4, 4, 0, 0]} />
@@ -128,7 +146,7 @@ const WeeklyAnalytics = () => {
                                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                                         <XAxis dataKey="name" stroke="#adb5bd" tick={{ fill: '#adb5bd' }} />
                                         <YAxis stroke="#adb5bd" tick={{ fill: '#adb5bd' }} />
-                                        <RechartsTooltip content={<CustomTooltip />} />
+                                        <RechartsTooltip content={CustomTooltip} />
                                         <Legend iconType="circle" />
                                         <Line type="monotone" dataKey="clicks" name="Total Clicks" stroke="#00B4D8" strokeWidth={3} dot={{ r: 4, fill: '#00B4D8', strokeWidth: 2 }} activeDot={{ r: 6 }} />
                                         <Line type="monotone" dataKey="conversions" name="Conversions" stroke="#E0E1DD" strokeWidth={3} dot={{ r: 4, fill: '#E0E1DD', strokeWidth: 2 }} activeDot={{ r: 6 }} />

@@ -2,7 +2,12 @@ import React from 'react';
 import './Navbar.css';
 import { useAuth } from '../context/AuthContext';
 
-const Navbar = ({ toggleSidebar, onProfileClick }) => {
+interface NavbarProps {
+  toggleSidebar: () => void;
+  onProfileClick: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ toggleSidebar, onProfileClick }) => {
   const { user, logout } = useAuth();
 
   return (

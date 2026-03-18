@@ -1,23 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import './AdCollaboration.css';
 import api from '../api';
 
-const AdCollaboration = () => {
-    const [ads, setAds] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
-    const [selectedAdId, setSelectedAdId] = useState(null);
+interface Campaign {
+    id: string;
+    name: string;
+    assignedTo: string;
+    week: string;
+    status: string;
+}
+
+const AdCollaboration: React.FC = () => {
+    const [ads, setAds] = useState<Campaign[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+    const [isApplyModalOpen, setIsApplyModalOpen] = useState<boolean>(false);
+    const [selectedAdId, setSelectedAdId] = useState<string | null>(null);
 
     // Form states
-    const [newAdName, setNewAdName] = useState('');
-    const [newAdWeek, setNewAdWeek] = useState('');
-    const [applyInfluencerName, setApplyInfluencerName] = useState('');
+    const [newAdName, setNewAdName] = useState<string>('');
+    const [newAdWeek, setNewAdWeek] = useState<string>('');
+    const [applyInfluencerName, setApplyInfluencerName] = useState<string>('');
 
     useEffect(() => {
         const fetchCampaigns = async () => {
             try {
-                const res = await api.get('/campaigns');
+                const res = await api.get<Campaign[]>('/campaigns');
                 setAds(res.data);
             } catch (err) {
                 console.error("Error fetching campaigns", err);
@@ -28,12 +36,12 @@ const AdCollaboration = () => {
         fetchCampaigns();
     }, []);
 
-    const handleCreateAd = async (e) => {
+    const handleCreateAd = async (e: FormEvent) => {
         e.preventDefault();
         if (newAdName && newAdWeek) {
             // Note: In a fully implemented backend, this POSTs to /campaigns
             // For now, mocking optimistically the local state update
-            const newAd = {
+            const newAd: Campaign = {
                 id: Math.random().toString(),
                 name: newAdName,
                 assignedTo: 'Unassigned',
@@ -48,13 +56,13 @@ const AdCollaboration = () => {
         }
     };
 
-    const openApplyModal = (adId) => {
+    const openApplyModal = (adId: string) => {
         setSelectedAdId(adId);
         setApplyInfluencerName('');
         setIsApplyModalOpen(true);
     };
 
-    const handleApplyForAd = async (e) => {
+    const handleApplyForAd = async (e: FormEvent) => {
         e.preventDefault();
         if (applyInfluencerName && selectedAdId) {
             // Optimistic mock update - In true API, would POST to /applications
@@ -147,7 +155,7 @@ const AdCollaboration = () => {
                                     type="text"
                                     placeholder="e.g., Summer Promo"
                                     value={newAdName}
-                                    onChange={(e) => setNewAdName(e.target.value)}
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAdName(e.target.value)}
                                     required
                                 />
                             </div>
@@ -157,7 +165,7 @@ const AdCollaboration = () => {
                                     type="text"
                                     placeholder="e.g., Week 26"
                                     value={newAdWeek}
-                                    onChange={(e) => setNewAdWeek(e.target.value)}
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAdWeek(e.target.value)}
                                     required
                                 />
                             </div>
@@ -185,7 +193,7 @@ const AdCollaboration = () => {
                                     type="text"
                                     placeholder="Enter your name"
                                     value={applyInfluencerName}
-                                    onChange={(e) => setApplyInfluencerName(e.target.value)}
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) => setApplyInfluencerName(e.target.value)}
                                     required
                                 />
                             </div>

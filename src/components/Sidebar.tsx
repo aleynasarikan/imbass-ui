@@ -1,7 +1,14 @@
 import React from 'react';
 import './Sidebar.css';
 
-const Sidebar = ({ isOpen, closeSidebar, activePage, setActivePage }) => {
+interface SidebarProps {
+    isOpen: boolean;
+    closeSidebar: () => void;
+    activePage: string;
+    setActivePage: (page: string) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar, activePage, setActivePage }) => {
     const navItems = [
         { name: 'Home', icon: '🏠' },
         { name: 'Dashboard', icon: '⊞' },
@@ -11,7 +18,7 @@ const Sidebar = ({ isOpen, closeSidebar, activePage, setActivePage }) => {
         { name: 'Settings', icon: '⚙️' }
     ];
 
-    const handleNavClick = (itemName) => {
+    const handleNavClick = (itemName: string) => {
         setActivePage(itemName);
         if (window.innerWidth <= 768) {
             closeSidebar();

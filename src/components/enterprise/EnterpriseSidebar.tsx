@@ -1,7 +1,14 @@
 import React from 'react';
 import '../../styles/enterprise.css';
 
-const EnterpriseSidebar = ({ activePage, setActivePage }) => {
+interface EnterpriseSidebarProps {
+  activePage: string;
+  setActivePage: (page: string) => void;
+}
+
+const EnterpriseSidebarLabel = ({ label }: { label: string }) => <span>{label}</span>;
+
+const EnterpriseSidebar: React.FC<EnterpriseSidebarProps> = ({ activePage, setActivePage }) => {
   const menuItems = [
     { id: 'Home', label: 'Overview', icon: 'H' },
     { id: 'Dashboard', label: 'Creator Roster', icon: 'R' },
