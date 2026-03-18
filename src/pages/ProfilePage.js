@@ -1,25 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ProfilePage.css';
-
-const INITIAL_PROFILE = {
-    name: 'Alex Chen',
-    role: 'Influencer',
-    email: 'alex.chen@example.com',
-    bio: 'Lifestyle & tech creator passionate about showcasing innovative products to a dedicated audience.',
-    platforms: {
-        youtube: true,
-        instagram: true,
-        tiktok: false
-    },
-    location: 'Los Angeles, CA'
-};
+import api from '../api';
 
 const ProfilePage = () => {
-    const [profile, setProfile] = useState(INITIAL_PROFILE);
+    const [profile, setProfile] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [editForm, setEditForm] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    // Temporary state for the edit form
-    const [editForm, setEditForm] = useState(INITIAL_PROFILE);
+    // Fetch Profile from DB over Protected Route
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await api.get('/profile/me');
+                setProfile(res.data);
+                setEditForm(res.data);
+            } catch (err) {
+                console.error("Failed to load profile", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfile();
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -39,16 +42,25 @@ const ProfilePage = () => {
         });
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        setProfile(editForm);
-        setIsEditing(false);
+        try {
+            await api.put('/profile/me', editForm);
+            setProfile(editForm);
+            setIsEditing(false);
+        } catch (err) {
+            console.error("Failed to update profile", err);
+            alert("Error saving profile");
+        }
     };
 
     const handleCancel = () => {
         setEditForm(profile);
         setIsEditing(false);
     };
+
+    if (loading) return <div style={{ padding: '50px', textAlign: 'center' }}>Loading Profile...</div>;
+    if (!profile) return <div style={{ padding: '50px', textAlign: 'center' }}>Could not load profile. Ensure you are logged in.</div>;
 
     return (
         <div className="profile-container">
@@ -73,7 +85,7 @@ const ProfilePage = () => {
                                 <input
                                     type="text"
                                     name="name"
-                                    value={editForm.name}
+                                    value={editForm.name || ''}
                                     onChange={handleInputChange}
                                     className="edit-input name-input"
                                 />
@@ -81,20 +93,7 @@ const ProfilePage = () => {
                                 <h2>{profile.name}</h2>
                             )}
 
-                            {isEditing ? (
-                                <select
-                                    name="role"
-                                    value={editForm.role}
-                                    onChange={handleInputChange}
-                                    className="edit-select role-select"
-                                >
-                                    <option value="Influencer">Influencer</option>
-                                    <option value="Agency">Agency</option>
-                                    <option value="Producer">Producer</option>
-                                </select>
-                            ) : (
-                                <span className="role-badge">{profile.role}</span>
-                            )}
+                            <span className="role-badge">{profile.role}</span>
                         </div>
 
                         {!isEditing && (
@@ -113,13 +112,13 @@ const ProfilePage = () => {
                             {isEditing ? (
                                 <textarea
                                     name="bio"
-                                    value={editForm.bio}
+                                    value={editForm.bio || ''}
                                     onChange={handleInputChange}
                                     className="edit-textarea"
                                     rows="4"
                                 />
                             ) : (
-                                <p>{profile.bio}</p>
+                                <p>{profile.bio || 'No bio provided.'}</p>
                             )}
                         </div>
 
@@ -131,12 +130,12 @@ const ProfilePage = () => {
                                     <input
                                         type="email"
                                         name="email"
-                                        value={editForm.email}
+                                        value={editForm.email || ''}
                                         onChange={handleInputChange}
                                         className="edit-input"
                                     />
                                 ) : (
-                                    <span className="info-value">{profile.email}</span>
+                                    <span className="info-value">{profile.email || profile.contactEmail}</span>
                                 )}
                             </div>
                             <div className="info-row">
@@ -145,12 +144,12 @@ const ProfilePage = () => {
                                     <input
                                         type="text"
                                         name="location"
-                                        value={editForm.location}
+                                        value={editForm.location || ''}
                                         onChange={handleInputChange}
                                         className="edit-input"
                                     />
                                 ) : (
-                                    <span className="info-value">{profile.location}</span>
+                                    <span className="info-value">{profile.location || 'Location not set'}</span>
                                 )}
                             </div>
                         </div>
@@ -162,7 +161,7 @@ const ProfilePage = () => {
                                     <label className="checkbox-container">
                                         <input
                                             type="checkbox"
-                                            checked={editForm.platforms.youtube}
+                                            checked={editForm.platforms?.youtube}
                                             onChange={() => handlePlatformChange('youtube')}
                                         />
                                         <span className="checkmark"></span>
@@ -171,7 +170,7 @@ const ProfilePage = () => {
                                     <label className="checkbox-container">
                                         <input
                                             type="checkbox"
-                                            checked={editForm.platforms.instagram}
+                                            checked={editForm.platforms?.instagram}
                                             onChange={() => handlePlatformChange('instagram')}
                                         />
                                         <span className="checkmark"></span>
@@ -180,7 +179,7 @@ const ProfilePage = () => {
                                     <label className="checkbox-container">
                                         <input
                                             type="checkbox"
-                                            checked={editForm.platforms.tiktok}
+                                            checked={editForm.platforms?.tiktok}
                                             onChange={() => handlePlatformChange('tiktok')}
                                         />
                                         <span className="checkmark"></span>
@@ -189,10 +188,10 @@ const ProfilePage = () => {
                                 </div>
                             ) : (
                                 <div className="active-platforms">
-                                    {profile.platforms.youtube && <span className="platform-tag youtube">YouTube</span>}
-                                    {profile.platforms.instagram && <span className="platform-tag instagram">Instagram</span>}
-                                    {profile.platforms.tiktok && <span className="platform-tag tiktok">TikTok</span>}
-                                    {!profile.platforms.youtube && !profile.platforms.instagram && !profile.platforms.tiktok && (
+                                    {profile.platforms?.youtube && <span className="platform-tag youtube">YouTube</span>}
+                                    {profile.platforms?.instagram && <span className="platform-tag instagram">Instagram</span>}
+                                    {profile.platforms?.tiktok && <span className="platform-tag tiktok">TikTok</span>}
+                                    {!profile.platforms?.youtube && !profile.platforms?.instagram && !profile.platforms?.tiktok && (
                                         <span className="no-platforms">No platforms linked</span>
                                     )}
                                 </div>

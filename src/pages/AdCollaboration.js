@@ -1,15 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './AdCollaboration.css';
-
-const INITIAL_ADS = [
-    { id: 1, name: 'Summer Campaign', assignedTo: 'Unassigned', week: 'Week 24', status: 'Open' },
-    { id: 2, name: 'Tech Gadget Launch', assignedTo: 'Alex Chen', week: 'Week 25', status: 'Assigned' },
-    { id: 3, name: 'Fitness App Promo', assignedTo: 'Jessica Lee', week: 'Week 25', status: 'In Progress' },
-    { id: 4, name: 'Beauty Brand Collab', assignedTo: 'Unassigned', week: 'Week 26', status: 'Open' },
-];
+import api from '../api';
 
 const AdCollaboration = () => {
-    const [ads, setAds] = useState(INITIAL_ADS);
+    const [ads, setAds] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
     const [selectedAdId, setSelectedAdId] = useState(null);
@@ -19,17 +14,34 @@ const AdCollaboration = () => {
     const [newAdWeek, setNewAdWeek] = useState('');
     const [applyInfluencerName, setApplyInfluencerName] = useState('');
 
-    const handleCreateAd = (e) => {
+    useEffect(() => {
+        const fetchCampaigns = async () => {
+            try {
+                const res = await api.get('/campaigns');
+                setAds(res.data);
+            } catch (err) {
+                console.error("Error fetching campaigns", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCampaigns();
+    }, []);
+
+    const handleCreateAd = async (e) => {
         e.preventDefault();
         if (newAdName && newAdWeek) {
+            // Note: In a fully implemented backend, this POSTs to /campaigns
+            // For now, mocking optimistically the local state update
             const newAd = {
-                id: ads.length + 1,
+                id: Math.random().toString(),
                 name: newAdName,
                 assignedTo: 'Unassigned',
                 week: newAdWeek,
-                status: 'Open'
+                status: 'OPEN'
             };
             setAds([...ads, newAd]);
+
             setNewAdName('');
             setNewAdWeek('');
             setIsCreateModalOpen(false);
@@ -42,12 +54,13 @@ const AdCollaboration = () => {
         setIsApplyModalOpen(true);
     };
 
-    const handleApplyForAd = (e) => {
+    const handleApplyForAd = async (e) => {
         e.preventDefault();
         if (applyInfluencerName && selectedAdId) {
+            // Optimistic mock update - In true API, would POST to /applications
             setAds(ads.map(ad => {
                 if (ad.id === selectedAdId) {
-                    return { ...ad, assignedTo: applyInfluencerName, status: 'Assigned' };
+                    return { ...ad, assignedTo: applyInfluencerName, status: 'ASSIGNED' };
                 }
                 return ad;
             }));
@@ -55,6 +68,8 @@ const AdCollaboration = () => {
             setSelectedAdId(null);
         }
     };
+
+    if (loading) return <div style={{ padding: '50px', textAlign: 'center' }}>Loading Campaigns...</div>;
 
     return (
         <div className="collaboration-container">
@@ -93,12 +108,12 @@ const AdCollaboration = () => {
                                 </td>
                                 <td>{ad.week}</td>
                                 <td>
-                                    <span className={`status-pill ${ad.status.replace(/\s+/g, '-').toLowerCase()}`}>
-                                        {ad.status}
+                                    <span className={`status-pill ${ad.status.replace(/_/g, '-').toLowerCase()}`}>
+                                        {ad.status.replace(/_/g, ' ')}
                                     </span>
                                 </td>
                                 <td>
-                                    {ad.status === 'Open' ? (
+                                    {ad.status === 'OPEN' ? (
                                         <button
                                             className="apply-btn"
                                             onClick={() => openApplyModal(ad.id)}

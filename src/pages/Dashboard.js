@@ -1,27 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
-
-const INITIAL_INFLUENCERS = [
-    { id: 1, name: 'Alex Chen', platform: 'YouTube', status: 'active', followers: '1.2M' },
-    { id: 2, name: 'Sarah Jones', platform: 'Instagram', status: 'active', followers: '850K' },
-    { id: 3, name: 'Mike Ross', platform: 'TikTok', status: 'inactive', followers: '2.1M' },
-    { id: 4, name: 'Emma Wilson', platform: 'YouTube', status: 'active', followers: '500K' },
-    { id: 5, name: 'David Kim', platform: 'Instagram', status: 'inactive', followers: '120K' },
-    { id: 6, name: 'Jessica Lee', platform: 'TikTok', status: 'active', followers: '3.4M' },
-];
+import api from '../api';
 
 const Dashboard = () => {
-    const [influencers, setInfluencers] = useState(INITIAL_INFLUENCERS);
+    const [influencers, setInfluencers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [platformFilter, setPlatformFilter] = useState('All');
+    const [loading, setLoading] = useState(true);
 
     const platforms = ['All', 'YouTube', 'Instagram', 'TikTok'];
 
+    useEffect(() => {
+        const fetchInfluencers = async () => {
+            try {
+                const res = await api.get('/influencers'); // Uses standard token via interceptor
+                setInfluencers(res.data);
+            } catch (err) {
+                console.error("Failed to fetch influencers", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchInfluencers();
+    }, []);
+
     const filteredInfluencers = influencers.filter(inf => {
         const matchesSearch = inf.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesPlatform = platformFilter === 'All' || inf.platform === platformFilter;
+        const matchesPlatform = platformFilter === 'All' || inf.platform.toLowerCase() === platformFilter.toLowerCase();
         return matchesSearch && matchesPlatform;
     });
+
+    if (loading) return <div style={{ padding: '50px', textAlign: 'center' }}>Loading Influencers...</div>;
 
     return (
         <div className="dashboard-container">
@@ -56,7 +65,7 @@ const Dashboard = () => {
                     filteredInfluencers.map(inf => (
                         <div key={inf.id} className="influencer-card">
                             <div className="influencer-avatar">
-                                {inf.name.charAt(0)}
+                                {inf.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="influencer-info">
                                 <h3>{inf.name}</h3>

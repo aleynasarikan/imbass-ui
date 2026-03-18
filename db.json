@@ -1,0 +1,119 @@
+{
+    "users": [
+        {
+            "id": "u1",
+            "email": "alex@example.com",
+            "role": "INFLUENCER"
+        },
+        {
+            "id": "u2",
+            "email": "agency@example.com",
+            "role": "AGENCY"
+        },
+        {
+            "id": "u3",
+            "email": "jessica@example.com",
+            "role": "INFLUENCER"
+        }
+    ],
+    "profiles": [
+        {
+            "id": "p1",
+            "userId": "u1",
+            "fullName": "Alex Chen",
+            "bio": "Tech Creator",
+            "location": "LA",
+            "status": "active"
+        },
+        {
+            "id": "p2",
+            "userId": "u3",
+            "fullName": "Jessica Lee",
+            "bio": "Lifestyle Vlogger",
+            "location": "NY",
+            "status": "active"
+        },
+        {
+            "id": "p3",
+            "userId": "u2",
+            "fullName": "Creative Media Agency",
+            "bio": "Top tier agency",
+            "location": "London",
+            "status": "active"
+        }
+    ],
+    "platforms": [
+        {
+            "id": "pl1",
+            "profileId": "p1",
+            "name": "YouTube",
+            "followers": "1.2M",
+            "username": "@alexchen_tech"
+        },
+        {
+            "id": "pl2",
+            "profileId": "p2",
+            "name": "TikTok",
+            "followers": "3.4M",
+            "username": "@jessicalee"
+        }
+    ],
+    "campaigns": [
+        {
+            "id": "c1",
+            "creatorId": "u2",
+            "title": "Summer Campaign",
+            "week": "Week 24",
+            "status": "Open",
+            "brand": "Nike"
+        },
+        {
+            "id": "c2",
+            "creatorId": "u2",
+            "title": "Tech Gadget Launch",
+            "week": "Week 25",
+            "status": "Assigned",
+            "brand": "Sony"
+        },
+        {
+            "id": "c3",
+            "creatorId": "u2",
+            "title": "Fitness App Promo",
+            "week": "Week 25",
+            "status": "In Progress",
+            "brand": "FitBit"
+        }
+    ],
+    "applications": [
+        {
+            "id": "a1",
+            "campaignId": "c2",
+            "influencerId": "u1",
+            "status": "ACCEPTED"
+        },
+        {
+            "id": "a2",
+            "campaignId": "c3",
+            "influencerId": "u3",
+            "status": "ACCEPTED"
+        }
+    ],
+    "analytics": [
+        {
+            "id": "an1",
+            "applicationId": "a1",
+            "engagement": 85000,
+            "reach": 120000,
+            "clicks": 3200,
+            "conversions": 210
+        },
+        {
+            "id": "an2",
+            "applicationId": "a2",
+            "engagement": 110000,
+            "reach": 340000,
+            "clicks": 4500,
+            "conversions": 320
+        }
+    ]
+}
