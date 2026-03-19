@@ -12,13 +12,13 @@ export const getMyProfile = async (userId: string) => {
     throw { statusCode: 404, message: 'Profile not found' };
   }
 
-  const platformsResult = await query('SELECT * FROM platforms WHERE profile_id = $1', [profile.id]);
+  const platformsResult = await query('SELECT * FROM social_accounts WHERE profile_id = $1', [profile.id]);
   const platforms = platformsResult.rows;
 
   const platformsObj = {
-    youtube: platforms.some((p: any) => p.platform_name === 'YOUTUBE'),
-    instagram: platforms.some((p: any) => p.platform_name === 'INSTAGRAM'),
-    tiktok: platforms.some((p: any) => p.platform_name === 'TIKTOK')
+    youtube: platforms.some((p: any) => p.platform === 'YOUTUBE'),
+    instagram: platforms.some((p: any) => p.platform === 'INSTAGRAM'),
+    tiktok: platforms.some((p: any) => p.platform === 'TIKTOK')
   };
 
   return {
@@ -54,7 +54,7 @@ export const updateMyProfile = async (
     );
 
     await client.query('UPDATE users SET email = $1 WHERE id = $2', [data.email, userId]);
-    await client.query('DELETE FROM platforms WHERE profile_id = $1', [profile.id]);
+    await client.query('DELETE FROM social_accounts WHERE profile_id = $1', [profile.id]);
 
     if (data.platforms) {
       const platformEntries = [
@@ -66,7 +66,7 @@ export const updateMyProfile = async (
       for (const p of platformEntries) {
         if (data.platforms[p.key]) {
           await client.query(
-            'INSERT INTO platforms (profile_id, platform_name, username) VALUES ($1, $2, $3)',
+            'INSERT INTO social_accounts (profile_id, platform, username) VALUES ($1, $2, $3)',
             [profile.id, p.name, `User_${p.key}`]
           );
         }

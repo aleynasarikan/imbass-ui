@@ -5,12 +5,12 @@ export const getInfluencers = async () => {
     SELECT 
       profiles.id, 
       profiles.full_name as name, 
-      platforms.platform_name as platform, 
-      platforms.follower_count as followers,
+      social_accounts.platform as platform, 
+      social_accounts.follower_count as followers,
       'active' as status
     FROM users 
     JOIN profiles ON users.id = profiles.user_id
-    JOIN platforms ON profiles.id = platforms.profile_id
+    JOIN social_accounts ON profiles.id = social_accounts.profile_id
     WHERE users.role = 'INFLUENCER'
   `);
   

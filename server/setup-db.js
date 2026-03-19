@@ -74,17 +74,17 @@ async function setup() {
             );
         `);
         await client.query(`
-            CREATE TABLE IF NOT EXISTS platforms (
+            CREATE TABLE IF NOT EXISTS social_accounts (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-                platform_name TEXT NOT NULL CHECK(platform_name IN ('YOUTUBE','INSTAGRAM','TIKTOK')),
+                platform TEXT NOT NULL,
                 username TEXT NOT NULL,
                 follower_count BIGINT DEFAULT 0 CHECK(follower_count >= 0),
-                profile_link TEXT,
+                profile_url TEXT,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
             );
         `);
-        await client.query(`
+        console.log('✅ social_accounts table');        await client.query(`
             CREATE TABLE IF NOT EXISTS campaigns (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 creator_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
@@ -171,29 +171,19 @@ async function setup() {
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
             );
         `);
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS social_accounts (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                profile_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-                platform TEXT NOT NULL,
-                username TEXT NOT NULL,
-                profile_url TEXT,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            );
-        `);
+        // Social accounts now created above
         console.log('✅ All tables created');
 
         // ── Indexes ──
         const indexes = [
             `CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
             `CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id)`,
-            `CREATE INDEX IF NOT EXISTS idx_platforms_profile_id ON platforms(profile_id)`,
+            `CREATE INDEX IF NOT EXISTS idx_social_accounts_profile_id ON social_accounts(profile_id)`,
             `CREATE INDEX IF NOT EXISTS idx_campaigns_status ON campaigns(status)`,
             `CREATE INDEX IF NOT EXISTS idx_negotiations_campaign ON negotiations(campaign_id)`,
             `CREATE INDEX IF NOT EXISTS idx_negotiation_events_neg_id ON negotiation_events(negotiation_id)`,
             `CREATE INDEX IF NOT EXISTS idx_ledger_entries_transaction_id ON ledger_entries(transaction_id)`,
             `CREATE INDEX IF NOT EXISTS idx_ledger_entries_account_id ON ledger_entries(account_id)`,
-            `CREATE INDEX IF NOT EXISTS idx_social_accounts_profile_id ON social_accounts(profile_id)`,
         ];
         for (const sql of indexes) await client.query(sql);
         console.log('✅ Indexes');
@@ -271,24 +261,24 @@ async function setup() {
             );
             console.log('  ✅ 4 profiles');
 
-            // Platforms
+            // Social Accounts
             await client.query(
-                `INSERT INTO platforms (profile_id, platform_name, username, follower_count) VALUES ($1, 'INSTAGRAM', '@ayseyilmaz', 1200000)`,
+                `INSERT INTO social_accounts (profile_id, platform, username, follower_count) VALUES ($1, 'INSTAGRAM', '@ayseyilmaz', 1200000)`,
                 [p1.rows[0].id]
             );
             await client.query(
-                `INSERT INTO platforms (profile_id, platform_name, username, follower_count) VALUES ($1, 'YOUTUBE', 'AyseVlogs', 850000)`,
+                `INSERT INTO social_accounts (profile_id, platform, username, follower_count) VALUES ($1, 'YOUTUBE', 'AyseVlogs', 850000)`,
                 [p1.rows[0].id]
             );
             await client.query(
-                `INSERT INTO platforms (profile_id, platform_name, username, follower_count) VALUES ($1, 'YOUTUBE', 'MehmetTech', 2100000)`,
+                `INSERT INTO social_accounts (profile_id, platform, username, follower_count) VALUES ($1, 'YOUTUBE', 'MehmetTech', 2100000)`,
                 [p2.rows[0].id]
             );
             await client.query(
-                `INSERT INTO platforms (profile_id, platform_name, username, follower_count) VALUES ($1, 'TIKTOK', '@mehmetkaya', 3500000)`,
+                `INSERT INTO social_accounts (profile_id, platform, username, follower_count) VALUES ($1, 'TIKTOK', '@mehmetkaya', 3500000)`,
                 [p2.rows[0].id]
             );
-            console.log('  ✅ 4 platforms');
+            console.log('  ✅ 4 social accounts');
 
             // Campaigns
             const c1 = await client.query(
