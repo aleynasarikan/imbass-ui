@@ -1,45 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
+import React, { useState } from 'react';
 import EnterpriseNavbar from './components/enterprise/EnterpriseNavbar';
 import EnterpriseSidebar from './components/enterprise/EnterpriseSidebar';
-import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
 import EnterpriseDashboard from './pages/enterprise/EnterpriseDashboard';
-import AdCollaboration from './pages/AdCollaboration';
 import WeeklyAnalytics from './pages/WeeklyAnalytics';
+import AdCollaboration from './pages/AdCollaboration';
 import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import OnboardingPage from './pages/OnboardingPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import './styles/enterprise.css'; // Global inclusion of enterprise tokens
-
-declare module 'react' {
-  interface StyleHTMLAttributes<T> extends React.HTMLAttributes<T> {
-    jsx?: boolean;
-    global?: boolean;
-  }
-}
+import { cn } from './lib/utils';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activePage, setActivePage] = useState<string>('Home');
-  const [useEnterpriseLayout, setUseEnterpriseLayout] = useState<boolean>(true);
   const [showRegister, setShowRegister] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (useEnterpriseLayout) {
-      document.body.classList.add('enterprise-mode');
-    } else {
-      document.body.classList.remove('enterprise-mode');
-    }
-  }, [useEnterpriseLayout]);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-dark">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-accent-peach border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-muted">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
-  if (loading) return null;
-
-  // ── Auth Gate: No user → Login or Register ──
+  // Auth Gate
   if (!user) {
     if (showRegister) {
       return <RegisterPage onSwitchToLogin={() => setShowRegister(false)} />;
@@ -47,91 +36,46 @@ const AppContent: React.FC = () => {
     return <LoginPage onSwitchToRegister={() => setShowRegister(true)} />;
   }
 
-  // ── Onboarding Gate: Force onboarding if not complete ──
+  // Onboarding Gate
   if (user.isOnboarding) {
     return <OnboardingPage />;
   }
 
-  // ── Main App ──
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const closeSidebar = () => setIsSidebarOpen(false);
-  const navigateToProfile = () => setActivePage('Profile');
-
-  if (useEnterpriseLayout) {
-    return (
-      <div className="enterprise-layout-root">
-        <EnterpriseSidebar activePage={activePage} setActivePage={setActivePage} />
-        <EnterpriseNavbar />
-        <main className="enterprise-content">
-          {(activePage === 'Home' || activePage === 'Dashboard') && <EnterpriseDashboard />}
-          {activePage === 'Analytics' && <WeeklyAnalytics />}
-          {activePage === 'Collaborations' && <AdCollaboration />}
-          {activePage === 'Profile' && <ProfilePage />}
-
-          <div className="layout-switcher">
-            <button onClick={() => setUseEnterpriseLayout(false)}>Switch to Classic UI</button>
-          </div>
-        </main>
-
-        <style jsx>{`
-          .enterprise-layout-root {
-            display: flex;
-            min-height: 100vh;
-          }
-          .enterprise-content {
-            flex: 1;
-            margin-left: var(--enterprise-sidebar-width);
-            margin-top: var(--enterprise-navbar-height);
-            padding: 40px;
-            background-color: var(--enterprise-bg);
-            min-height: calc(100vh - var(--enterprise-navbar-height));
-          }
-          .layout-switcher {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-          }
-          .layout-switcher button {
-            padding: 8px 12px;
-            background: #000;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            opacity: 0.5;
-          }
-          .layout-switcher button:hover {
-            opacity: 1;
-          }
-        `}</style>
-      </div>
-    );
-  }
+  const pageTitles: Record<string, string> = {
+    Home: 'Dashboard',
+    Dashboard: 'Influencers',
+    Analytics: 'Analytics',
+    Collaborations: 'Campaigns',
+    Profile: 'Profile',
+  };
 
   return (
-    <div className="app-container">
-      <Navbar toggleSidebar={toggleSidebar} onProfileClick={navigateToProfile} />
-      <div className="main-layout">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          closeSidebar={closeSidebar}
-          activePage={activePage}
-          setActivePage={setActivePage}
-        />
-        <main className="content-area">
-          {activePage === 'Home' && <Home />}
-          {activePage === 'Dashboard' && <Dashboard />}
-          {activePage === 'Analytics' && <WeeklyAnalytics />}
-          {activePage === 'Collaborations' && <AdCollaboration />}
-          {activePage === 'Profile' && <ProfilePage />}
+    <div className="min-h-screen bg-dark">
+      <EnterpriseSidebar
+        activePage={activePage}
+        setActivePage={setActivePage}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
-          <div className="layout-switcher">
-            <button onClick={() => setUseEnterpriseLayout(true)}>Switch to Enterprise UI</button>
-          </div>
-        </main>
-      </div>
+      <EnterpriseNavbar
+        pageTitle={pageTitles[activePage] || 'Dashboard'}
+        onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
+
+      <main
+        className={cn(
+          "transition-all duration-300 pt-24 pb-6 min-h-screen",
+          "lg:ml-[260px]",
+          "px-4 md:px-6 lg:px-8"
+        )}
+      >
+        {(activePage === 'Home') && <EnterpriseDashboard />}
+        {activePage === 'Dashboard' && <EnterpriseDashboard />}
+        {activePage === 'Analytics' && <WeeklyAnalytics />}
+        {activePage === 'Collaborations' && <AdCollaboration />}
+        {activePage === 'Profile' && <ProfilePage />}
+      </main>
     </div>
   );
 };

@@ -1,207 +1,317 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api';
-import '../../styles/enterprise.css';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
+import { Avatar, AvatarFallback } from '../../components/ui/Avatar';
+import { Eye, Gift, Code, Clock, CheckCircle, ChevronRight, TrendingUp, MoreHorizontal } from 'lucide-react';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  ResponsiveContainer, Cell,
+} from 'recharts';
 
 interface Influencer {
-    id: string;
-    name: string;
-    platform: string;
-    followers: string | number;
+  id: string;
+  name: string;
+  platform: string;
+  followers: string | number;
 }
 
+// Mock campaign data matching the reference design
+const campaignData = [
+  { name: 'Growth Campaign', remaining: '48h', redemptions: 36, color: '#e8a87c' },
+  { name: 'Brand Awareness', remaining: '72h', redemptions: 18, color: '#d4736e' },
+  { name: 'Extra Discount', remaining: '24h', redemptions: 52, color: '#c97b84' },
+  { name: 'Influencer Push', remaining: '12h', redemptions: 8, color: '#b08bbf' },
+];
+
+// Mock daily redemptions data
+const dailyRedemptionsData = [
+  { date: '01.02', value: 1800 }, { date: '01.03', value: 2200 }, { date: '01.04', value: 2600 },
+  { date: '01.05', value: 2100 }, { date: '01.06', value: 3200 }, { date: '01.07', value: 4205 },
+  { date: '01.08', value: 3800 }, { date: '01.09', value: 2400 }, { date: '01.10', value: 2900 },
+  { date: '01.11', value: 2000 }, { date: '01.12', value: 1700 }, { date: '01.01', value: 2100 },
+  { date: '01.02', value: 3500 }, { date: '01.03', value: 4205 }, { date: '01.04', value: 2800 },
+];
+
+const avatarColors = ['#e8a87c', '#d4736e', '#c97b84', '#b08bbf', '#7ec8a0', '#6ea8d4', '#e8a87c', '#d4736e'];
+
 const EnterpriseDashboard: React.FC = () => {
-    const [influencers, setInfluencers] = useState<Influencer[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+  const [influencers, setInfluencers] = useState<Influencer[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [chartFilter, setChartFilter] = useState<string>('All');
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await api.get<Influencer[]>('/influencers');
-                setInfluencers(res.data);
-            } catch (err) {
-                console.error("Error fetching data", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await api.get<Influencer[]>('/influencers');
+        setInfluencers(res.data);
+      } catch (err) {
+        console.error("Error fetching data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-    return (
-        <div className="enterprise-page">
-            <header className="page-header">
-                <div className="page-title-block">
-                    <h1>Commercial Overview</h1>
-                    <p>Real-time campaign performance and roster liquidity.</p>
-                </div>
-                <div className="page-actions">
-                    <button className="btn-secondary">Export CSV</button>
-                    <button className="btn-primary">Create Campaign</button>
-                </div>
-            </header>
+  const maxValue = Math.max(...dailyRedemptionsData.map(d => d.value));
 
-            <div className="kpi-container">
-                <div className="kpi-block">
-                    <div className="kpi-label">Active Negotiations</div>
-                    <div className="kpi-value">14</div>
-                </div>
-                <div className="kpi-block">
-                    <div className="kpi-label">Total Contract Value</div>
-                    <div className="kpi-value">$248,500.00</div>
-                </div>
-                <div className="kpi-block">
-                    <div className="kpi-label">Roster Utilization</div>
-                    <div className="kpi-value">72.4%</div>
-                </div>
-                <div className="kpi-block">
-                    <div className="kpi-label">Pending Settlements</div>
-                    <div className="kpi-value">9</div>
-                </div>
-            </div>
-
-            <div className="data-surface">
-                <div className="surface-header">
-                    <h3>Creator Roster Liquidity</h3>
-                    <div className="table-filters">
-                        <select className="select-input">
-                            <option value="all">All Platforms</option>
-                            <option value="instagram">Instagram</option>
-                            <option value="youtube">YouTube</option>
-                            <option value="tiktok">TikTok</option>
-                        </select>
-                    </div>
-                </div>
-                {loading ? (
-                    <div className="loading-state">Syncing with ledger...</div>
-                ) : (
-                    <table className="enterprise-table">
-                        <thead>
-                            <tr>
-                                <th>Creator Entity</th>
-                                <th>Primary Platform</th>
-                                <th>Audience Reach</th>
-                                <th>Negotiation Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {influencers.map((inf) => (
-                                <tr key={inf.id}>
-                                    <td className="font-semibold">{inf.name}</td>
-                                    <td>
-                                        <span className="platform-tag">{inf.platform}</span>
-                                    </td>
-                                    <td>{inf.followers}</td>
-                                    <td>
-                                        <span className="status-indicator-flat">Active Bid</span>
-                                    </td>
-                                    <td>
-                                        <button className="text-btn">Manage</button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
-            </div>
-
-            <style jsx>{`
-        .enterprise-page {
-          padding-top: var(--enterprise-spacing-lg);
-        }
-
-        .page-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          margin-bottom: var(--enterprise-spacing-lg);
-        }
-
-        .page-title-block h1 {
-          font-size: 24px;
-          font-weight: 700;
-          color: var(--enterprise-text-primary);
-          margin: 0 0 4px 0;
-        }
-
-        .page-title-block p {
-          color: var(--enterprise-text-secondary);
-          margin: 0;
-          font-size: 14px;
-        }
-
-        .page-actions {
-          display: flex;
-          gap: 12px;
-        }
-
-        .data-surface {
-          background: var(--enterprise-surface);
-          border: 1px solid var(--enterprise-border);
-          border-radius: var(--enterprise-radius);
-        }
-
-        .surface-header {
-          padding: 16px 24px;
-          border-bottom: 1px solid var(--enterprise-border);
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .surface-header h3 {
-          margin: 0;
-          font-size: 16px;
-          font-weight: 600;
-        }
-
-        .platform-tag {
-          font-size: 11px;
-          font-weight: 600;
-          background: #F1F5F9;
-          padding: 2px 8px;
-          border-radius: 4px;
-          color: var(--enterprise-text-secondary);
-        }
-
-        .status-indicator-flat {
-          font-size: 12px;
-          color: var(--enterprise-success);
-          font-weight: 500;
-        }
-
-        .text-btn {
-          background: none;
-          border: none;
-          color: var(--enterprise-accent);
-          font-weight: 600;
-          font-size: 13px;
-          cursor: pointer;
-          padding: 0;
-        }
-
-        .select-input {
-          padding: 6px 12px;
-          border: 1px solid var(--enterprise-border);
-          border-radius: 4px;
-          font-size: 13px;
-          outline: none;
-          background: #F8FAFC;
-        }
-
-        .loading-state {
-          padding: 40px;
-          text-align: center;
-          color: var(--enterprise-text-secondary);
-          font-style: italic;
-        }
-
-        .font-semibold {
-            font-weight: 600;
-        }
-      `}</style>
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-dark-card border border-white/10 rounded-lg px-3 py-2 shadow-card">
+          <p className="text-xs text-muted mb-1">{label}</p>
+          <p className="text-sm font-semibold text-white">{payload[0].value.toLocaleString()}</p>
         </div>
-    );
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Campaign Type Tabs */}
+      <Tabs defaultValue="imbass" className="w-full">
+        <TabsList className="w-full md:w-auto grid grid-cols-3 md:inline-flex bg-dark-100 border border-white/[0.06]">
+          <TabsTrigger value="imbass" className="gap-2">
+            <span className="hidden sm:inline">🎯</span> Imbass Campaign
+          </TabsTrigger>
+          <TabsTrigger value="discount" className="gap-2">
+            <span className="hidden sm:inline">🎁</span> Discount
+          </TabsTrigger>
+          <TabsTrigger value="influencer" className="gap-2">
+            <span className="hidden sm:inline">⭐</span> Influencer
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {/* Campaigns Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold text-white">Campaigns</h2>
+            <div className="hidden md:flex items-center gap-2 text-xs text-muted">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-white/30" /> All</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-success" /> 4 Active</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-warning" /> 5 Paused</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-muted" /> 3 Draft</span>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="text-xs">All Campaigns</Button>
+        </div>
+
+        {/* Campaign Cards - Horizontally scrollable */}
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory">
+          {campaignData.map((campaign, i) => (
+            <Card
+              key={i}
+              className="min-w-[220px] md:min-w-[250px] flex-shrink-0 snap-start"
+              style={{ borderLeft: `3px solid ${campaign.color}` }}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: campaign.color }} />
+                    <span className="text-sm font-medium text-white">{campaign.name}</span>
+                  </div>
+                  <button className="p-1 text-muted hover:text-white transition-colors">
+                    <MoreHorizontal size={14} />
+                  </button>
+                </div>
+                <div className="flex gap-6">
+                  <div>
+                    <div className="text-[11px] text-muted mb-0.5">Remaining</div>
+                    <div className="flex items-center gap-1.5">
+                      <Clock size={13} className="text-muted" />
+                      <span className="text-base font-semibold text-white">{campaign.remaining}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-muted mb-0.5">Redemptions</div>
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle size={13} className="text-muted" />
+                      <span className="text-base font-semibold text-white">{campaign.redemptions}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* Scroll indicator */}
+          <div className="flex items-center px-2 flex-shrink-0">
+            <button className="p-2 rounded-full bg-dark-50 text-muted hover:text-white hover:bg-dark-card transition-colors">
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Influencers Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-accent-peach">✨</span>
+            <h2 className="text-lg font-semibold text-white">Influencers</h2>
+          </div>
+          <Button variant="outline" size="sm" className="text-xs">All Influencers</Button>
+        </div>
+
+        <div className="flex gap-5 overflow-x-auto pb-2 snap-x snap-mandatory">
+          {(influencers.length > 0 ? influencers : Array.from({ length: 8 }, (_, i) => ({
+            id: String(i),
+            name: ['Alex H.', 'Nataly H.', 'Jack M.', 'Erick A.', 'Adam F.', 'Kim H.', 'Anna P.', 'Rita O.'][i],
+            platform: 'Instagram',
+            followers: '10K'
+          }))).map((inf, i) => (
+            <div key={inf.id} className="flex flex-col items-center gap-2 snap-start flex-shrink-0">
+              <Avatar className="h-14 w-14 ring-2 ring-offset-2 ring-offset-dark" style={{ '--tw-ring-color': avatarColors[i % avatarColors.length] } as React.CSSProperties}>
+                <AvatarFallback
+                  className="text-lg font-bold"
+                  style={{ backgroundColor: `${avatarColors[i % avatarColors.length]}30`, color: avatarColors[i % avatarColors.length] }}
+                >
+                  {inf.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-xs text-muted-lighter whitespace-nowrap">{inf.name}</span>
+            </div>
+          ))}
+          <div className="flex items-center px-2 flex-shrink-0">
+            <button className="p-2 rounded-full bg-dark-50 text-muted hover:text-white hover:bg-dark-card transition-colors">
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Daily Redemptions Chart */}
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-muted">📊</span>
+            <CardTitle className="text-base">Daily Redemptions</CardTitle>
+          </div>
+          <div className="flex items-center gap-1 bg-dark-100 rounded-lg p-0.5 border border-white/[0.06]">
+            {['24h', '7d', 'All'].map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setChartFilter(filter)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                  chartFilter === filter
+                    ? 'bg-dark-card text-white shadow-sm'
+                    : 'text-muted hover:text-muted-lighter'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[250px] md:h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dailyRedemptionsData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  stroke="#8b8ba3"
+                  tick={{ fill: '#8b8ba3', fontSize: 11 }}
+                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  stroke="#8b8ba3"
+                  tick={{ fill: '#8b8ba3', fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {dailyRedemptionsData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.value === maxValue ? '#e8a87c' : 'rgba(255,255,255,0.08)'}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-dark-card">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <p className="text-sm text-muted">Views</p>
+                  <span className="text-muted text-xs cursor-help">ⓘ</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-accent-peach/10">
+                    <Eye size={18} className="text-accent-peach" />
+                  </div>
+                  <span className="text-2xl md:text-3xl font-bold text-white">52,550</span>
+                </div>
+              </div>
+              <Badge variant="success" className="text-xs">
+                <TrendingUp size={12} className="mr-1" />+12.5%
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-dark-card">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <p className="text-sm text-muted">Redemptions</p>
+                  <span className="text-muted text-xs cursor-help">ⓘ</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-accent-salmon/10">
+                    <Gift size={18} className="text-accent-salmon" />
+                  </div>
+                  <span className="text-2xl md:text-3xl font-bold text-white">4,205</span>
+                </div>
+              </div>
+              <Badge variant="success" className="text-xs">
+                <TrendingUp size={12} className="mr-1" />+32.5%
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-dark-card">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <p className="text-sm text-muted">Code Clips</p>
+                  <span className="text-muted text-xs cursor-help">ⓘ</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-accent-lilac/10">
+                    <Code size={18} className="text-accent-lilac" />
+                  </div>
+                  <span className="text-2xl md:text-3xl font-bold text-white">205</span>
+                </div>
+              </div>
+              <Badge variant="success" className="text-xs">
+                <TrendingUp size={12} className="mr-1" />+3.8%
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 };
 
 export default EnterpriseDashboard;

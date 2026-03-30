@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-    LineChart, Line, Legend
+    LineChart, Line, Legend, AreaChart, Area
 } from 'recharts';
-import './WeeklyAnalytics.css';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
+import { TrendingUp, Star, Flame } from 'lucide-react';
 import api from '../api';
 
 interface InfluencerMetric {
@@ -41,12 +43,19 @@ const WeeklyAnalytics: React.FC = () => {
         fetchAnalytics();
     }, []);
 
-    if (loading) return <div style={{ padding: '50px', textAlign: 'center' }}>Loading Analytics...</div>;
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-2 border-accent-peach border-t-transparent rounded-full animate-spin" />
+                    <span className="text-sm text-muted">Loading Analytics...</span>
+                </div>
+            </div>
+        );
+    }
 
-    // Protection from empty states
     const hasData = analyticsData.influencers?.length > 0 && analyticsData.ads?.length > 0;
 
-    // Logic to find best performers dynamically
     let bestInfluencer: InfluencerMetric = { name: 'N/A', engagement: 0, reach: 0 };
     let bestAd: AdMetric = { name: 'N/A', conversions: 0, clicks: 0 };
 
@@ -54,7 +63,6 @@ const WeeklyAnalytics: React.FC = () => {
         bestInfluencer = analyticsData.influencers.reduce((prev, current) =>
             (prev.engagement + prev.reach > current.engagement + current.reach) ? prev : current
         );
-
         bestAd = analyticsData.ads.reduce((prev, current) =>
             (prev.conversions > current.conversions) ? prev : current
         );
@@ -63,10 +71,10 @@ const WeeklyAnalytics: React.FC = () => {
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="custom-tooltip">
-                    <p className="tooltip-label">{label}</p>
+                <div className="bg-dark-card border border-white/10 rounded-lg px-3 py-2 shadow-card">
+                    <p className="text-xs text-muted mb-1">{label}</p>
                     {payload.map((entry: any, index: number) => (
-                        <p key={`item-${index}`} style={{ color: entry.color }}>
+                        <p key={`item-${index}`} className="text-sm" style={{ color: entry.color }}>
                             {`${entry.name}: ${entry.value}`}
                         </p>
                     ))}
@@ -77,88 +85,128 @@ const WeeklyAnalytics: React.FC = () => {
     };
 
     return (
-        <div className="analytics-container">
-            <div className="analytics-header">
-                <div className="header-titles">
-                    <h2>Weekly Analytics</h2>
-                    <p>Track performance metrics and campaign conversions.</p>
-                </div>
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-xl font-bold text-white mb-1">Weekly Analytics</h2>
+                <p className="text-sm text-muted">Track performance metrics and campaign conversions.</p>
             </div>
 
             {hasData ? (
                 <>
-                    <div className="highlights-grid">
-                        <div className="highlight-card influencer-highlight">
-                            <div className="highlight-icon">⭐</div>
-                            <div className="highlight-info">
-                                <h4>Top Influencer of the Week</h4>
-                                <h3>{bestInfluencer.name}</h3>
-                                <div className="highlight-stats">
-                                    <span>Engagement: {bestInfluencer.engagement}K</span>
-                                    <span>Reach: {bestInfluencer.reach}K</span>
+                    {/* Highlight Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card className="border-l-4 border-l-accent-peach">
+                            <CardContent className="p-5">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-3 rounded-xl bg-accent-peach/10">
+                                        <Star size={22} className="text-accent-peach" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-muted uppercase tracking-wider mb-1">Top Influencer of the Week</p>
+                                        <h3 className="text-lg font-bold text-white mb-2">{bestInfluencer.name}</h3>
+                                        <div className="flex gap-4">
+                                            <div>
+                                                <span className="text-xs text-muted">Engagement</span>
+                                                <p className="text-sm font-semibold text-accent-peach">{bestInfluencer.engagement}K</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-xs text-muted">Reach</span>
+                                                <p className="text-sm font-semibold text-accent-lilac">{bestInfluencer.reach}K</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
 
-                        <div className="highlight-card ad-highlight">
-                            <div className="highlight-icon">🔥</div>
-                            <div className="highlight-info">
-                                <h4>Best Performing Ad</h4>
-                                <h3>{bestAd.name}</h3>
-                                <div className="highlight-stats">
-                                    <span>Conversions: {bestAd.conversions}</span>
-                                    <span>Clicks: {bestAd.clicks}</span>
+                        <Card className="border-l-4 border-l-accent-salmon">
+                            <CardContent className="p-5">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-3 rounded-xl bg-accent-salmon/10">
+                                        <Flame size={22} className="text-accent-salmon" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-muted uppercase tracking-wider mb-1">Best Performing Ad</p>
+                                        <h3 className="text-lg font-bold text-white mb-2">{bestAd.name}</h3>
+                                        <div className="flex gap-4">
+                                            <div>
+                                                <span className="text-xs text-muted">Conversions</span>
+                                                <p className="text-sm font-semibold text-accent-salmon">{bestAd.conversions}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-xs text-muted">Clicks</span>
+                                                <p className="text-sm font-semibold text-muted-lighter">{bestAd.clicks}</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
                     </div>
 
-                    <div className="charts-grid">
-                        <div className="chart-card">
-                            <h3>Influencer Performance (Reach vs. Engagement)</h3>
-                            <div className="chart-wrapper">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart
-                                        data={analyticsData.influencers}
-                                        margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-                                    >
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                                        <XAxis dataKey="name" stroke="#adb5bd" tick={{ fill: '#adb5bd' }} />
-                                        <YAxis stroke="#adb5bd" tick={{ fill: '#adb5bd' }} />
-                                        <RechartsTooltip content={CustomTooltip} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
-                                        <Legend iconType="circle" />
-                                        <Bar dataKey="reach" name="Reach (K)" fill="#9D4EDD" radius={[4, 4, 0, 0]} />
-                                        <Bar dataKey="engagement" name="Engagement (K)" fill="#00B4D8" radius={[4, 4, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
+                    {/* Charts */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-base">Influencer Performance</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="h-[280px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={analyticsData.influencers} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                                            <XAxis dataKey="name" stroke="#8b8ba3" tick={{ fill: '#8b8ba3', fontSize: 11 }} tickLine={false} axisLine={{ stroke: 'rgba(255,255,255,0.06)' }} />
+                                            <YAxis stroke="#8b8ba3" tick={{ fill: '#8b8ba3', fontSize: 11 }} tickLine={false} axisLine={false} />
+                                            <RechartsTooltip content={CustomTooltip} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+                                            <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', color: '#8b8ba3' }} />
+                                            <Bar dataKey="reach" name="Reach (K)" fill="#b08bbf" radius={[4, 4, 0, 0]} />
+                                            <Bar dataKey="engagement" name="Engagement (K)" fill="#e8a87c" radius={[4, 4, 0, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                        <div className="chart-card">
-                            <h3>Ad Campaign Clicks vs Conversions</h3>
-                            <div className="chart-wrapper">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <LineChart
-                                        data={analyticsData.ads}
-                                        margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-                                    >
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                                        <XAxis dataKey="name" stroke="#adb5bd" tick={{ fill: '#adb5bd' }} />
-                                        <YAxis stroke="#adb5bd" tick={{ fill: '#adb5bd' }} />
-                                        <RechartsTooltip content={CustomTooltip} />
-                                        <Legend iconType="circle" />
-                                        <Line type="monotone" dataKey="clicks" name="Total Clicks" stroke="#00B4D8" strokeWidth={3} dot={{ r: 4, fill: '#00B4D8', strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                                        <Line type="monotone" dataKey="conversions" name="Conversions" stroke="#E0E1DD" strokeWidth={3} dot={{ r: 4, fill: '#E0E1DD', strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-base">Ad Campaign Performance</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="h-[280px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={analyticsData.ads} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="clicksGrad" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#e8a87c" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#e8a87c" stopOpacity={0} />
+                                                </linearGradient>
+                                                <linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#b08bbf" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#b08bbf" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                                            <XAxis dataKey="name" stroke="#8b8ba3" tick={{ fill: '#8b8ba3', fontSize: 11 }} tickLine={false} axisLine={{ stroke: 'rgba(255,255,255,0.06)' }} />
+                                            <YAxis stroke="#8b8ba3" tick={{ fill: '#8b8ba3', fontSize: 11 }} tickLine={false} axisLine={false} />
+                                            <RechartsTooltip content={CustomTooltip} />
+                                            <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', color: '#8b8ba3' }} />
+                                            <Area type="monotone" dataKey="clicks" name="Total Clicks" stroke="#e8a87c" fill="url(#clicksGrad)" strokeWidth={2} dot={{ r: 3, fill: '#e8a87c', strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                                            <Area type="monotone" dataKey="conversions" name="Conversions" stroke="#b08bbf" fill="url(#convGrad)" strokeWidth={2} dot={{ r: 3, fill: '#b08bbf', strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </>
             ) : (
-                <div className="no-data-msg" style={{ marginTop: '2rem', padding: '2rem', background: 'var(--glass-bg)', border: 'var(--glass-border)', borderRadius: '12px', textAlign: 'center' }}>
-                    <p>Insufficient analytical data available to populate dashboards yet.</p>
-                </div>
+                <Card>
+                    <CardContent className="p-8 text-center">
+                        <div className="text-4xl mb-3">📊</div>
+                        <p className="text-muted-lighter font-medium mb-1">No Data Yet</p>
+                        <p className="text-sm text-muted">Insufficient analytical data available to populate dashboards yet.</p>
+                    </CardContent>
+                </Card>
             )}
         </div>
     );

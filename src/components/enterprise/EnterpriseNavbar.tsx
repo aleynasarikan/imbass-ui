@@ -1,103 +1,59 @@
 import React from 'react';
-import '../../styles/enterprise.css';
+import { Bell, Mail, Menu, Search } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
-const EnterpriseNavbar: React.FC = () => {
-    return (
-        <header className="enterprise-navbar">
-            <div className="navbar-content">
-                <div className="navbar-search">
-                    <input type="text" placeholder="Search campaigns, creators, or transactions..." />
-                </div>
-                <div className="navbar-actions">
-                    <div className="notification-trigger">
-                        <span className="dot"></span>
-                        🔔
-                    </div>
-                    <div className="global-status">
-                        <span className="status-label">Network Status:</span>
-                        <span className="status-value positive">Operational</span>
-                    </div>
-                </div>
-            </div>
+interface EnterpriseNavbarProps {
+  pageTitle: string;
+  onMenuToggle: () => void;
+  sidebarCollapsed?: boolean;
+}
 
-            <style jsx>{`
-        .enterprise-navbar {
-          height: var(--enterprise-navbar-height);
-          background-color: var(--enterprise-surface);
-          border-bottom: 1px solid var(--enterprise-border);
-          position: fixed;
-          top: 0;
-          right: 0;
-          left: var(--enterprise-sidebar-width);
-          z-index: 90;
-          padding: 0 24px;
-          display: flex;
-          align-items: center;
-        }
+const EnterpriseNavbar: React.FC<EnterpriseNavbarProps> = ({ pageTitle, onMenuToggle, sidebarCollapsed }) => {
+  return (
+    <header
+      className={cn(
+        "fixed top-0 right-0 z-30 h-16 flex items-center justify-between px-4 md:px-6",
+        "bg-dark-nav/80 backdrop-blur-xl border-b border-white/[0.06]",
+        "transition-all duration-300",
+        sidebarCollapsed ? "lg:left-[72px]" : "lg:left-[260px]",
+        "left-0"
+      )}
+    >
+      <div className="flex items-center gap-3">
+        {/* Mobile menu button */}
+        <button
+          onClick={onMenuToggle}
+          className="lg:hidden p-2 rounded-lg text-muted hover:text-white hover:bg-white/5 transition-colors"
+        >
+          <Menu size={20} />
+        </button>
 
-        .navbar-content {
-          display: flex;
-          justify-content: space-between;
-          width: 100%;
-          align-items: center;
-        }
+        <h1 className="text-lg md:text-xl font-bold text-white">{pageTitle}</h1>
+      </div>
 
-        .navbar-search input {
-          width: 320px;
-          background-color: #F8FAFC;
-          border: 1px solid var(--enterprise-border);
-          border-radius: 4px;
-          padding: 8px 12px;
-          font-size: 13px;
-          outline: none;
-          transition: border-color 0.2s;
-        }
+      <div className="flex items-center gap-2">
+        {/* Search - hidden on mobile */}
+        <div className="hidden md:flex items-center relative">
+          <Search size={16} className="absolute left-3 text-muted" />
+          <input
+            type="text"
+            placeholder="Search..."
+            className="w-56 h-9 pl-9 pr-4 rounded-lg bg-white/[0.04] border border-white/[0.06] text-sm text-white placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent-peach/30 focus:border-accent-peach/30 transition-all"
+          />
+        </div>
 
-        .navbar-search input:focus {
-          border-color: var(--enterprise-accent);
-          background-color: white;
-        }
+        {/* Icon buttons */}
+        <button className="relative p-2.5 rounded-xl text-muted hover:text-white hover:bg-white/5 transition-colors">
+          <Bell size={18} />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-accent-salmon rounded-full ring-2 ring-dark-nav" />
+        </button>
 
-        .navbar-actions {
-          display: flex;
-          align-items: center;
-          gap: 24px;
-        }
-
-        .notification-trigger {
-          font-size: 18px;
-          cursor: pointer;
-          position: relative;
-        }
-
-        .dot {
-          width: 6px;
-          height: 6px;
-          background: var(--enterprise-danger);
-          border-radius: 50%;
-          position: absolute;
-          top: 0;
-          right: 0;
-        }
-
-        .global-status {
-          font-size: 12px;
-          display: flex;
-          gap: 8px;
-          align-items: center;
-        }
-
-        .status-label {
-          color: var(--enterprise-text-secondary);
-        }
-
-        .status-value.positive {
-          color: var(--enterprise-success);
-          font-weight: 600;
-        }
-      `}</style>
-        </header>
-    );
+        <button className="relative p-2.5 rounded-xl text-muted hover:text-white hover:bg-white/5 transition-colors">
+          <Mail size={18} />
+        </button>
+      </div>
+    </header>
+  );
 };
 
 export default EnterpriseNavbar;
