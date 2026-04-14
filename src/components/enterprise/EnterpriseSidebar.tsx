@@ -23,6 +23,7 @@ const EnterpriseSidebar: React.FC<EnterpriseSidebarProps> = ({ activePage, setAc
     { id: 'Dashboard', label: 'Influencers', icon: Users },
     { id: 'Analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'Collaborations', label: 'Campaigns', icon: MessageSquare },
+    { id: 'Console', label: 'Console', icon: FileText },
     { id: 'Profile', label: 'Profile', icon: Settings },
   ];
 

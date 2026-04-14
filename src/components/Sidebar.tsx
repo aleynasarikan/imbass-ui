@@ -1,5 +1,6 @@
 import React from 'react';
 import './Sidebar.css';
+import { Home, LayoutDashboard, LineChart, Handshake, MessageSquare, Settings } from 'lucide-react';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -10,12 +11,12 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, closeSidebar, activePage, setActivePage }) => {
     const navItems = [
-        { name: 'Home', icon: '🏠' },
-        { name: 'Dashboard', icon: '⊞' },
-        { name: 'Analytics', icon: '📈' },
-        { name: 'Collaborations', icon: '🤝' },
-        { name: 'Messages', icon: '💬' },
-        { name: 'Settings', icon: '⚙️' }
+        { name: 'Home', icon: <Home size={20} /> },
+        { name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+        { name: 'Analytics', icon: <LineChart size={20} /> },
+        { name: 'Collaborations', icon: <Handshake size={20} /> },
+        { name: 'Messages', icon: <MessageSquare size={20} /> },
+        { name: 'Settings', icon: <Settings size={20} /> }
     ];
 
     const handleNavClick = (itemName: string) => {

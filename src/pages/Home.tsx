@@ -1,4 +1,5 @@
 import React from 'react';
+import { Rocket, Gem, Zap } from 'lucide-react';
 import './Home.css';
 
 const Home: React.FC = () => {
@@ -12,17 +13,17 @@ const Home: React.FC = () => {
 
             <section className="dashboard-cards">
                 <div className="card">
-                    <div className="card-icon">🚀</div>
+                    <div className="card-icon"><Rocket /></div>
                     <h3>Performance</h3>
                     <p>Lightning fast rendering and optimized data flow crafted with modern React practices.</p>
                 </div>
                 <div className="card">
-                    <div className="card-icon">💎</div>
+                    <div className="card-icon"><Gem /></div>
                     <h3>Aesthetics</h3>
                     <p>Premium dark mode with smooth purple, teal, and silver gradients providing a stunning visual experience.</p>
                 </div>
                 <div className="card">
-                    <div className="card-icon">⚡</div>
+                    <div className="card-icon"><Zap /></div>
                     <h3>Responsive</h3>
                     <p>Flawless native-like experience running smoothly on desktop, tablet, and mobile devices.</p>
                 </div>

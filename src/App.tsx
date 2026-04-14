@@ -8,6 +8,7 @@ import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import OnboardingPage from './pages/OnboardingPage';
+import NegotiationConsole from './pages/NegotiationConsole';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { cn } from './lib/utils';
 
@@ -74,6 +75,7 @@ const AppContent: React.FC = () => {
         {activePage === 'Dashboard' && <EnterpriseDashboard />}
         {activePage === 'Analytics' && <WeeklyAnalytics />}
         {activePage === 'Collaborations' && <AdCollaboration />}
+        {activePage === 'Console' && <NegotiationConsole />}
         {activePage === 'Profile' && <ProfilePage />}
       </main>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import api from '../api';
+import { Search, Users } from 'lucide-react';
 
 interface Influencer {
     id: string;
@@ -46,7 +47,7 @@ const Dashboard: React.FC = () => {
                 <h2>Influencer Management</h2>
                 <div className="dashboard-controls">
                     <div className="search-box">
-                        <span className="search-icon">🔍</span>
+                        <span className="search-icon"><Search size={16} /></span>
                         <input
                             type="text"
                             placeholder="Search influencers..."
@@ -81,7 +82,7 @@ const Dashboard: React.FC = () => {
                                     <span className={`platform-badge ${inf.platform.toLowerCase()}`}>
                                         {inf.platform}
                                     </span>
-                                    <span className="followers-count">👥 {inf.followers}</span>
+                                    <span className="followers-count"><Users size={14} className="inline mr-1" /> {inf.followers}</span>
                                 </div>
                             </div>
                             <div className="influencer-status">

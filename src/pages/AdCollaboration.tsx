@@ -4,10 +4,11 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription
+    Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription
 } from '../components/ui/Dialog';
 import { Plus, ExternalLink } from 'lucide-react';
 import api from '../api';
+import { useAuth } from '../context/AuthContext';
 
 interface Campaign {
     id: string;
@@ -18,64 +19,73 @@ interface Campaign {
 }
 
 const AdCollaboration: React.FC = () => {
+    const { user } = useAuth();
     const [ads, setAds] = useState<Campaign[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
     const [isApplyModalOpen, setIsApplyModalOpen] = useState<boolean>(false);
     const [selectedAdId, setSelectedAdId] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const [newAdName, setNewAdName] = useState<string>('');
-    const [newAdWeek, setNewAdWeek] = useState<string>('');
-    const [applyInfluencerName, setApplyInfluencerName] = useState<string>('');
+    // Removing applyInfluencerName as the backend uses the token to identify the user
+    const [submitting, setSubmitting] = useState<boolean>(false);
+
+    const fetchCampaigns = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get<Campaign[]>('/campaigns');
+            setAds(res.data);
+        } catch (err) {
+            console.error("Error fetching campaigns", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchCampaigns = async () => {
-            try {
-                const res = await api.get<Campaign[]>('/campaigns');
-                setAds(res.data);
-            } catch (err) {
-                console.error("Error fetching campaigns", err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchCampaigns();
     }, []);
 
     const handleCreateAd = async (e: FormEvent) => {
         e.preventDefault();
-        if (newAdName && newAdWeek) {
-            const newAd: Campaign = {
-                id: Math.random().toString(),
-                name: newAdName,
-                assignedTo: 'Unassigned',
-                week: newAdWeek,
-                status: 'OPEN'
-            };
-            setAds([...ads, newAd]);
-            setNewAdName('');
-            setNewAdWeek('');
-            setIsCreateModalOpen(false);
+        if (newAdName) {
+            setSubmitting(true);
+            setError(null);
+            try {
+                await api.post('/campaigns', { title: newAdName });
+                setNewAdName('');
+                setIsCreateModalOpen(false);
+                fetchCampaigns(); // Refresh the list
+            } catch (err: any) {
+                setError(err.response?.data?.message || 'Failed to create campaign');
+            } finally {
+                setSubmitting(false);
+            }
         }
     };
 
     const openApplyModal = (adId: string) => {
         setSelectedAdId(adId);
-        setApplyInfluencerName('');
+        setError(null);
         setIsApplyModalOpen(true);
     };
 
     const handleApplyForAd = async (e: FormEvent) => {
         e.preventDefault();
-        if (applyInfluencerName && selectedAdId) {
-            setAds(ads.map(ad => {
-                if (ad.id === selectedAdId) {
-                    return { ...ad, assignedTo: applyInfluencerName, status: 'ASSIGNED' };
-                }
-                return ad;
-            }));
-            setIsApplyModalOpen(false);
-            setSelectedAdId(null);
+        if (selectedAdId) {
+            setSubmitting(true);
+            setError(null);
+            try {
+                await api.post(`/campaigns/${selectedAdId}/apply`);
+                setIsApplyModalOpen(false);
+                setSelectedAdId(null);
+                fetchCampaigns(); // Refresh
+            } catch (err: any) {
+                setError(err.response?.data?.message || 'Failed to apply for campaign');
+            } finally {
+                setSubmitting(false);
+            }
         }
     };
 
@@ -107,9 +117,11 @@ const AdCollaboration: React.FC = () => {
                     <h2 className="text-xl font-bold text-white mb-1">Ad Collaboration</h2>
                     <p className="text-sm text-muted">Manage and assign ad campaigns to influencers.</p>
                 </div>
-                <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2 w-full sm:w-auto">
-                    <Plus size={16} /> Create Ad
-                </Button>
+                {user?.role !== 'INFLUENCER' && (
+                    <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2 w-full sm:w-auto">
+                        <Plus size={16} /> Create Ad
+                    </Button>
+                )}
             </div>
 
             {/* Table */}
@@ -143,9 +155,13 @@ const AdCollaboration: React.FC = () => {
                                         </td>
                                         <td className="px-5 py-3.5">
                                             {ad.status === 'OPEN' ? (
-                                                <Button variant="ghost" size="sm" onClick={() => openApplyModal(ad.id)} className="text-accent-peach hover:text-accent-peach gap-1">
-                                                    <ExternalLink size={13} /> Apply
-                                                </Button>
+                                                user?.role === 'INFLUENCER' ? (
+                                                    <Button variant="ghost" size="sm" onClick={() => openApplyModal(ad.id)} className="text-accent-peach hover:text-accent-peach gap-1">
+                                                        <ExternalLink size={13} /> Apply
+                                                    </Button>
+                                                ) : (
+                                                    <span className="text-xs text-muted">Waiting Application</span>
+                                                )
                                             ) : (
                                                 <span className="text-xs text-muted">Closed</span>
                                             )}
@@ -172,6 +188,11 @@ const AdCollaboration: React.FC = () => {
                         <DialogTitle>Create New Ad</DialogTitle>
                         <DialogDescription>Fill in the details for your new ad campaign.</DialogDescription>
                     </DialogHeader>
+                    {error && (
+                        <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
+                            {error}
+                        </div>
+                    )}
                     <form onSubmit={handleCreateAd} className="space-y-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-muted-lighter">Ad Name</label>
@@ -182,18 +203,10 @@ const AdCollaboration: React.FC = () => {
                                 required
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-lighter">Week</label>
-                            <Input
-                                placeholder="e.g., Week 26"
-                                value={newAdWeek}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAdWeek(e.target.value)}
-                                required
-                            />
-                        </div>
+                        {/* We removed Ad Week as date is generated correctly by DB */}
                         <DialogFooter className="gap-2">
-                            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>Cancel</Button>
-                            <Button type="submit">Create</Button>
+                            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)} disabled={submitting}>Cancel</Button>
+                            <Button type="submit" disabled={submitting}>{submitting ? 'Creating...' : 'Create'}</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -204,21 +217,17 @@ const AdCollaboration: React.FC = () => {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Apply for Ad</DialogTitle>
-                        <DialogDescription>Enter your name to apply for this ad campaign.</DialogDescription>
+                        <DialogDescription>Are you sure you want to apply for this campaign? Your profile will be submitted to the agency for review.</DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleApplyForAd} className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-lighter">Your Name (Influencer)</label>
-                            <Input
-                                placeholder="Enter your name"
-                                value={applyInfluencerName}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) => setApplyInfluencerName(e.target.value)}
-                                required
-                            />
+                    {error && (
+                        <div className="p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
+                            {error}
                         </div>
-                        <DialogFooter className="gap-2">
-                            <Button type="button" variant="outline" onClick={() => setIsApplyModalOpen(false)}>Cancel</Button>
-                            <Button type="submit">Submit Application</Button>
+                    )}
+                    <form onSubmit={handleApplyForAd} className="space-y-4">
+                        <DialogFooter className="gap-2 mt-4">
+                            <Button type="button" variant="outline" onClick={() => setIsApplyModalOpen(false)} disabled={submitting}>Cancel</Button>
+                            <Button type="submit" disabled={submitting}>{submitting ? 'Applying...' : 'Submit Application'}</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

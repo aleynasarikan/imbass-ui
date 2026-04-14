@@ -5,7 +5,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
 import { Avatar, AvatarFallback } from '../../components/ui/Avatar';
-import { Eye, Gift, Code, Clock, CheckCircle, ChevronRight, TrendingUp, MoreHorizontal } from 'lucide-react';
+import { Eye, Gift, Code, Clock, CheckCircle, ChevronRight, TrendingUp, MoreHorizontal, Target, Star, Sparkles, BarChart2, Info } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, Cell,
@@ -18,45 +18,50 @@ interface Influencer {
   followers: string | number;
 }
 
-// Mock campaign data matching the reference design
-const campaignData = [
-  { name: 'Growth Campaign', remaining: '48h', redemptions: 36, color: '#e8a87c' },
-  { name: 'Brand Awareness', remaining: '72h', redemptions: 18, color: '#d4736e' },
-  { name: 'Extra Discount', remaining: '24h', redemptions: 52, color: '#c97b84' },
-  { name: 'Influencer Push', remaining: '12h', redemptions: 8, color: '#b08bbf' },
-];
-
-// Mock daily redemptions data
-const dailyRedemptionsData = [
-  { date: '01.02', value: 1800 }, { date: '01.03', value: 2200 }, { date: '01.04', value: 2600 },
-  { date: '01.05', value: 2100 }, { date: '01.06', value: 3200 }, { date: '01.07', value: 4205 },
-  { date: '01.08', value: 3800 }, { date: '01.09', value: 2400 }, { date: '01.10', value: 2900 },
-  { date: '01.11', value: 2000 }, { date: '01.12', value: 1700 }, { date: '01.01', value: 2100 },
-  { date: '01.02', value: 3500 }, { date: '01.03', value: 4205 }, { date: '01.04', value: 2800 },
-];
-
 const avatarColors = ['#e8a87c', '#d4736e', '#c97b84', '#b08bbf', '#7ec8a0', '#6ea8d4', '#e8a87c', '#d4736e'];
 
 const EnterpriseDashboard: React.FC = () => {
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [timeseries, setTimeseries] = useState<any[]>([]);
+  const [summary, setSummary] = useState<any>(null);
+  
   const [loading, setLoading] = useState<boolean>(true);
   const [chartFilter, setChartFilter] = useState<string>('All');
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
-        const res = await api.get<Influencer[]>('/influencers');
-        setInfluencers(res.data);
+        const [infRes, campRes, sumRes] = await Promise.all([
+           api.get<Influencer[]>('/influencers'),
+           api.get('/campaigns/dashboard'),
+           api.get('/analytics/summary')
+        ]);
+        setInfluencers(infRes.data);
+        setCampaigns(campRes.data);
+        setSummary(sumRes.data);
       } catch (err) {
-        console.error("Error fetching data", err);
+        console.error("Error fetching initial data", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchInitialData();
   }, []);
 
-  const maxValue = Math.max(...dailyRedemptionsData.map(d => d.value));
+  useEffect(() => {
+    const fetchTimeseries = async () => {
+      try {
+        const res = await api.get(`/analytics/timeseries?filter=${chartFilter}`);
+        setTimeseries(res.data);
+      } catch (err) {
+        console.error("Error fetching timeseries data", err);
+      }
+    };
+    fetchTimeseries();
+  }, [chartFilter]);
+
+  const maxValue = timeseries.length > 0 ? Math.max(...timeseries.map(d => d.value)) : 0;
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -76,13 +81,13 @@ const EnterpriseDashboard: React.FC = () => {
       <Tabs defaultValue="imbass" className="w-full">
         <TabsList className="w-full md:w-auto grid grid-cols-3 md:inline-flex bg-dark-100 border border-white/[0.06]">
           <TabsTrigger value="imbass" className="gap-2">
-            <span className="hidden sm:inline">🎯</span> Imbass Campaign
+            <Target size={16} className="hidden sm:inline" /> Imbass Campaign
           </TabsTrigger>
           <TabsTrigger value="discount" className="gap-2">
-            <span className="hidden sm:inline">🎁</span> Discount
+            <Gift size={16} className="hidden sm:inline" /> Discount
           </TabsTrigger>
           <TabsTrigger value="influencer" className="gap-2">
-            <span className="hidden sm:inline">⭐</span> Influencer
+            <Star size={16} className="hidden sm:inline" /> Influencer
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -104,9 +109,9 @@ const EnterpriseDashboard: React.FC = () => {
 
         {/* Campaign Cards - Horizontally scrollable */}
         <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory">
-          {campaignData.map((campaign, i) => (
+          {campaigns.map((campaign, i) => (
             <Card
-              key={i}
+              key={campaign.id}
               className="min-w-[220px] md:min-w-[250px] flex-shrink-0 snap-start"
               style={{ borderLeft: `3px solid ${campaign.color}` }}
             >
@@ -153,7 +158,7 @@ const EnterpriseDashboard: React.FC = () => {
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="text-accent-peach">✨</span>
+            <Sparkles size={18} className="text-accent-peach" />
             <h2 className="text-lg font-semibold text-white">Influencers</h2>
           </div>
           <Button variant="outline" size="sm" className="text-xs">All Influencers</Button>
@@ -190,7 +195,7 @@ const EnterpriseDashboard: React.FC = () => {
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center gap-2">
-            <span className="text-muted">📊</span>
+            <BarChart2 size={18} className="text-muted" />
             <CardTitle className="text-base">Daily Redemptions</CardTitle>
           </div>
           <div className="flex items-center gap-1 bg-dark-100 rounded-lg p-0.5 border border-white/[0.06]">
@@ -212,7 +217,7 @@ const EnterpriseDashboard: React.FC = () => {
         <CardContent>
           <div className="h-[250px] md:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dailyRedemptionsData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+              <BarChart data={timeseries} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
                 <XAxis
                   dataKey="date"
@@ -229,10 +234,10 @@ const EnterpriseDashboard: React.FC = () => {
                 />
                 <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                  {dailyRedemptionsData.map((entry, index) => (
+                  {timeseries.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={entry.value === maxValue ? '#e8a87c' : 'rgba(255,255,255,0.08)'}
+                      fill={entry.value === maxValue && maxValue > 0 ? '#e8a87c' : 'rgba(255,255,255,0.08)'}
                     />
                   ))}
                 </Bar>
@@ -250,17 +255,17 @@ const EnterpriseDashboard: React.FC = () => {
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
                   <p className="text-sm text-muted">Views</p>
-                  <span className="text-muted text-xs cursor-help">ⓘ</span>
+                  <Info size={14} className="text-muted cursor-help" />
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-accent-peach/10">
                     <Eye size={18} className="text-accent-peach" />
                   </div>
-                  <span className="text-2xl md:text-3xl font-bold text-white">52,550</span>
+                  <span className="text-2xl md:text-3xl font-bold text-white">{summary ? summary.views.toLocaleString() : '...'}</span>
                 </div>
               </div>
               <Badge variant="success" className="text-xs">
-                <TrendingUp size={12} className="mr-1" />+12.5%
+                <TrendingUp size={12} className="mr-1" />+{summary?.viewsGrowth || 0}%
               </Badge>
             </div>
           </CardContent>
@@ -272,17 +277,17 @@ const EnterpriseDashboard: React.FC = () => {
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
                   <p className="text-sm text-muted">Redemptions</p>
-                  <span className="text-muted text-xs cursor-help">ⓘ</span>
+                  <Info size={14} className="text-muted cursor-help" />
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-accent-salmon/10">
                     <Gift size={18} className="text-accent-salmon" />
                   </div>
-                  <span className="text-2xl md:text-3xl font-bold text-white">4,205</span>
+                  <span className="text-2xl md:text-3xl font-bold text-white">{summary ? summary.redemptions.toLocaleString() : '...'}</span>
                 </div>
               </div>
               <Badge variant="success" className="text-xs">
-                <TrendingUp size={12} className="mr-1" />+32.5%
+                <TrendingUp size={12} className="mr-1" />+{summary?.redemptionsGrowth || 0}%
               </Badge>
             </div>
           </CardContent>
@@ -294,17 +299,17 @@ const EnterpriseDashboard: React.FC = () => {
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
                   <p className="text-sm text-muted">Code Clips</p>
-                  <span className="text-muted text-xs cursor-help">ⓘ</span>
+                  <Info size={14} className="text-muted cursor-help" />
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-accent-lilac/10">
                     <Code size={18} className="text-accent-lilac" />
                   </div>
-                  <span className="text-2xl md:text-3xl font-bold text-white">205</span>
+                  <span className="text-2xl md:text-3xl font-bold text-white">{summary ? summary.clips.toLocaleString() : '...'}</span>
                 </div>
               </div>
               <Badge variant="success" className="text-xs">
-                <TrendingUp size={12} className="mr-1" />+3.8%
+                <TrendingUp size={12} className="mr-1" />+{summary?.clipsGrowth || 0}%
               </Badge>
             </div>
           </CardContent>

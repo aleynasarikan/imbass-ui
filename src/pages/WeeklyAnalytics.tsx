@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { TrendingUp, Star, Flame } from 'lucide-react';
+import { TrendingUp, Star, Flame, BarChart2 } from 'lucide-react';
 import api from '../api';
 
 interface InfluencerMetric {
@@ -202,7 +202,7 @@ const WeeklyAnalytics: React.FC = () => {
             ) : (
                 <Card>
                     <CardContent className="p-8 text-center">
-                        <div className="text-4xl mb-3">📊</div>
+                        <BarChart2 size={48} className="mx-auto text-muted mb-3" />
                         <p className="text-muted-lighter font-medium mb-1">No Data Yet</p>
                         <p className="text-sm text-muted">Insufficient analytical data available to populate dashboards yet.</p>
                     </CardContent>
