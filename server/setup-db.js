@@ -3,6 +3,8 @@
  * Creates all tables, types, triggers, and seeds initial data into Docker PostgreSQL.
  * Run: node server/setup-db.js
  */
+// Prefer server/.env; fall back to repo root .env for backwards compat
+require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
@@ -70,7 +72,22 @@ async function setup() {
                 avatar_url TEXT,
                 company_name TEXT,
                 logo_url TEXT,
+                slug         TEXT UNIQUE,
+                niche        TEXT,
+                is_available BOOLEAN NOT NULL DEFAULT true,
+                is_verified  BOOLEAN NOT NULL DEFAULT false,
+                trust_score  SMALLINT NOT NULL DEFAULT 0 CHECK (trust_score BETWEEN 0 AND 100),
+                xp           INTEGER  NOT NULL DEFAULT 0 CHECK (xp >= 0),
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        `);
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS follows (
+                follower_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                following_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                PRIMARY KEY (follower_id, following_user_id),
+                CHECK (follower_id <> following_user_id)
             );
         `);
         await client.query(`
@@ -178,7 +195,12 @@ async function setup() {
         const indexes = [
             `CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
             `CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id)`,
+            `CREATE INDEX IF NOT EXISTS idx_profiles_slug ON profiles(slug)`,
+            `CREATE INDEX IF NOT EXISTS idx_profiles_niche ON profiles(niche)`,
+            `CREATE INDEX IF NOT EXISTS idx_profiles_available ON profiles(is_available) WHERE is_available = true`,
             `CREATE INDEX IF NOT EXISTS idx_social_accounts_profile_id ON social_accounts(profile_id)`,
+            `CREATE INDEX IF NOT EXISTS idx_follows_follower ON follows(follower_id)`,
+            `CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_user_id)`,
             `CREATE INDEX IF NOT EXISTS idx_campaigns_status ON campaigns(status)`,
             `CREATE INDEX IF NOT EXISTS idx_negotiations_campaign ON negotiations(campaign_id)`,
             `CREATE INDEX IF NOT EXISTS idx_negotiation_events_neg_id ON negotiation_events(negotiation_id)`,
@@ -242,21 +264,27 @@ async function setup() {
             );
             console.log('  ✅ 4 users');
 
-            // Profiles
+            // Profiles — with marketplace fields (slug, niche, trust, xp)
             const p1 = await client.query(
-                `INSERT INTO profiles (user_id, full_name, bio, location, contact_email) VALUES ($1, 'Ayşe Yılmaz', 'Fashion & Lifestyle Creator', 'İstanbul, TR', 'ayse@imbass.com') RETURNING id`,
+                `INSERT INTO profiles (user_id, full_name, bio, location, contact_email, slug, niche, is_available, is_verified, trust_score, xp)
+                 VALUES ($1, 'Ayşe Yılmaz', 'Fashion & Lifestyle Creator', 'İstanbul, TR', 'ayse@imbass.com', 'ayse-yilmaz', 'Fashion',   true,  true, 88, 4200)
+                 RETURNING id`,
                 [u1.rows[0].id]
             );
             const p2 = await client.query(
-                `INSERT INTO profiles (user_id, full_name, bio, location, contact_email) VALUES ($1, 'Mehmet Kaya', 'Tech Reviewer & Vlogger', 'Ankara, TR', 'mehmet@imbass.com') RETURNING id`,
+                `INSERT INTO profiles (user_id, full_name, bio, location, contact_email, slug, niche, is_available, is_verified, trust_score, xp)
+                 VALUES ($1, 'Mehmet Kaya', 'Tech Reviewer & Vlogger',   'Ankara, TR',   'mehmet@imbass.com', 'mehmet-kaya', 'Tech',    true,  true, 91, 5800)
+                 RETURNING id`,
                 [u2.rows[0].id]
             );
             await client.query(
-                `INSERT INTO profiles (user_id, full_name, bio, location, contact_email) VALUES ($1, 'Digital Agency Co.', 'Full-service influencer marketing agency', 'İstanbul, TR', 'brand@agency.com')`,
+                `INSERT INTO profiles (user_id, full_name, bio, location, contact_email, slug, niche, is_available, trust_score, xp)
+                 VALUES ($1, 'Digital Agency Co.', 'Full-service influencer marketing agency', 'İstanbul, TR', 'brand@agency.com', 'digital-agency', 'Marketing', true, 79, 2100)`,
                 [u3.rows[0].id]
             );
             await client.query(
-                `INSERT INTO profiles (user_id, full_name, bio, location, contact_email) VALUES ($1, 'Ahmet Demir', 'Music & Video Producer', 'İzmir, TR', 'producer@imbass.com')`,
+                `INSERT INTO profiles (user_id, full_name, bio, location, contact_email, slug, niche, is_available, trust_score, xp)
+                 VALUES ($1, 'Ahmet Demir',        'Music & Video Producer', 'İzmir, TR', 'producer@imbass.com', 'ahmet-demir',    'Music',     false, 83, 3200)`,
                 [u4.rows[0].id]
             );
             console.log('  ✅ 4 profiles');

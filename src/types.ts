@@ -1,7 +1,16 @@
+export type UserRole = 'INFLUENCER' | 'AGENCY' | 'BRAND' | 'PRODUCER';
+
 export interface User {
     id: string;
     email: string;
-    role: 'INFLUENCER' | 'AGENCY' | 'PRODUCER';
+    /**
+     * Platform roles:
+     * - INFLUENCER: a creator (individual)
+     * - AGENCY: manages a roster of creators (CRM user)
+     * - BRAND: a sponsor reaching out directly to creators (marketplace buyer)
+     * - PRODUCER: legacy — kept for backwards compatibility with older records
+     */
+    role: UserRole;
     isOnboarding: boolean;
 }
 

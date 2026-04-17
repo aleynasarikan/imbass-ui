@@ -1,44 +1,42 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import * as negotiationService from '../services/negotiationService';
 import { catchAsync } from '../utils/catchAsync';
+import { AuthRequest } from '../types';
 
-export const getNegotiations = catchAsync(async (req: Request, res: Response) => {
-  // @ts-ignore
-  const userId = req.user.id;
-  // @ts-ignore
-  const role = req.user.role;
-  const data = await negotiationService.getNegotiations(userId, role);
+export const getNegotiations = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { id: userId, role } = req.user;
+  const data = await negotiationService.getNegotiations(userId, role as string);
   res.json(data);
 });
 
-export const makeOffer = catchAsync(async (req: Request, res: Response) => {
+export const makeOffer = catchAsync(async (req: AuthRequest, res: Response) => {
   const { campaignId } = req.params;
   const { offerAmount } = req.body;
-  // @ts-ignore
-  const userId = req.user.id;
-  // @ts-ignore
-  const role = req.user.role;
+  const { id: userId, role } = req.user;
 
   if (offerAmount === undefined) {
     return res.status(400).json({ message: 'Offer amount is required' });
   }
 
-  const negotiation = await negotiationService.makeOffer(campaignId, userId, role, offerAmount);
+  const negotiation = await negotiationService.makeOffer(
+    campaignId as string,
+    userId,
+    role as string,
+    offerAmount
+  );
   res.status(201).json(negotiation);
 });
 
-export const acceptOffer = catchAsync(async (req: Request, res: Response) => {
+export const acceptOffer = catchAsync(async (req: AuthRequest, res: Response) => {
   const { id } = req.params; // negotiation id
-  // @ts-ignore
-  const userId = req.user.id;
-  const negotiation = await negotiationService.acceptOffer(id, userId);
+  const { id: userId } = req.user;
+  const negotiation = await negotiationService.acceptOffer(id as string, userId);
   res.json(negotiation);
 });
 
-export const rejectOffer = catchAsync(async (req: Request, res: Response) => {
+export const rejectOffer = catchAsync(async (req: AuthRequest, res: Response) => {
   const { id } = req.params; // negotiation id
-  // @ts-ignore
-  const userId = req.user.id;
-  const negotiation = await negotiationService.rejectOffer(id, userId);
+  const { id: userId } = req.user;
+  const negotiation = await negotiationService.rejectOffer(id as string, userId);
   res.json(negotiation);
 });

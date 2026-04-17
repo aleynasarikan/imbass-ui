@@ -4,28 +4,48 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-peach/50 disabled:pointer-events-none disabled:opacity-50",
+  [
+    "inline-flex items-center justify-center gap-1.5 whitespace-nowrap",
+    "font-sans font-medium text-[13px] leading-none",
+    "rounded-full",
+    "transition-[transform,background,color,box-shadow,border-color] duration-200 ease-out",
+    "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-iris/20",
+    "disabled:pointer-events-none disabled:opacity-40",
+    "active:translate-y-px",
+  ].join(" "),
   {
     variants: {
       variant: {
-        default: "bg-accent-peach text-dark-500 hover:bg-accent-peach/90 shadow-glow",
-        destructive: "bg-danger text-white hover:bg-danger/90",
-        outline: "border border-white/10 bg-transparent text-muted-lighter hover:bg-white/5 hover:text-white",
-        secondary: "bg-dark-50 text-muted-lighter hover:bg-dark-card hover:text-white",
-        ghost: "text-muted-light hover:bg-white/5 hover:text-white",
-        link: "text-accent-peach underline-offset-4 hover:underline",
+        // Primary — white on dark (matches "All campaigns" pill in reference)
+        default:
+          "bg-white text-[#16181d] border border-white hover:bg-white/90 shadow-[0_6px_16px_-6px_rgba(255,255,255,0.18)]",
+        iris:
+          "bg-iris text-white border border-iris hover:bg-iris-deep shadow-[0_6px_16px_-6px_rgba(155,140,255,0.55)]",
+        coral:
+          "bg-iris text-white border border-iris hover:bg-iris-deep shadow-[0_6px_16px_-6px_rgba(155,140,255,0.55)] hover:-translate-y-0.5",
+        outline:
+          "bg-transparent text-text border border-line-strong hover:bg-surface-sunk hover:border-white/25",
+        ghost:
+          "bg-transparent text-text-soft hover:text-text hover:bg-white/6 border border-transparent",
+        soft:
+          "bg-iris-soft text-iris border border-transparent hover:bg-iris/22",
+        link:
+          "text-iris hover:text-[#b5a9ff] underline underline-offset-4 decoration-[1.5px] border-0 p-0 h-auto rounded-none",
+        destructive:
+          "bg-down/12 text-down border border-down/30 hover:bg-down hover:text-white hover:border-down",
+        secondary:
+          "bg-surface-sunk text-text border border-line hover:bg-surface-soft hover:border-line-strong",
+        dark:
+          "bg-[#0d0f13] text-white border border-white/10 hover:bg-[#17191f]",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-11 rounded-lg px-8",
-        icon: "h-9 w-9",
+        default: "h-10 px-5",
+        sm:      "h-8  px-3.5 text-[12px]",
+        lg:      "h-12 px-6   text-[14px]",
+        icon:    "h-10 w-10 p-0",
       },
     },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
+    defaultVariants: { variant: "default", size: "default" },
   }
 );
 

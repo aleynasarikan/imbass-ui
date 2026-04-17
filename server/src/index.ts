@@ -9,6 +9,8 @@ import onboardingRoutes from './routes/onboardingRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import dataRoutes from './routes/dataRoutes';
 import negotiationRoutes from './routes/negotiationRoutes';
+import creatorRoutes from './routes/creatorRoutes';
+import meRoutes from './routes/meRoutes';
 
 import { errorHandler } from './middleware/error';
 
@@ -56,6 +58,8 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/negotiations', negotiationRoutes);
+app.use('/api/creators', creatorRoutes);
+app.use('/api/me', meRoutes);
 app.use('/api', dataRoutes); // /api/influencers, /api/campaigns
 
 // 404 Handler

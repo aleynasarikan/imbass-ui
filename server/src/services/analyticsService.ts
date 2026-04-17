@@ -73,7 +73,7 @@ export const getTimeseriesAnalytics = async (filter: string = 'All') => {
   for(let i=days; i>0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateStr = \`\${String(date.getMonth() + 1).padStart(2, '0')}.\${String(date.getDate()).padStart(2, '0')}\`;
+      const dateStr = `${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
       
       let val = avg;
       // Introduce a slight pseudo-random variation or assign remainder to the last day

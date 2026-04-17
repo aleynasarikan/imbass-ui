@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import {
-  LayoutDashboard, BarChart3, Users, MessageSquare, Settings, FileText, Mail,
-  Globe, HelpCircle, ChevronLeft, X
+  LayoutGrid, FileText, MessageSquare, Rocket, Handshake,
+  AlertTriangle, CreditCard, Settings, BookOpen, PhoneCall,
+  ChevronLeft, ChevronDown, MoreVertical, HelpCircle, LogOut,
+  Compass, Award, Bookmark,
 } from 'lucide-react';
-import { Avatar, AvatarFallback } from '../ui/Avatar';
+import { useFollows } from '../../lib/stores/follows';
 import { cn } from '../../lib/utils';
 import { useAuth } from '../../context/AuthContext';
+import { Avatar, AvatarFallback } from '../ui/Avatar';
 
 interface EnterpriseSidebarProps {
   activePage: string;
@@ -14,29 +17,56 @@ interface EnterpriseSidebarProps {
   onClose: () => void;
 }
 
-const EnterpriseSidebar: React.FC<EnterpriseSidebarProps> = ({ activePage, setActivePage, isOpen, onClose }) => {
-  const { user, logout } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+/* Brand wordmark — Rebaid-style lowercase with an X accent */
+const BrandWord: React.FC = () => (
+  <div className="flex items-center gap-1 select-none">
+    <svg viewBox="0 0 14 14" className="w-[14px] h-[14px] text-iris" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <path d="M2 2 L12 12 M12 2 L2 12" />
+    </svg>
+    <span className="font-display text-[17px] font-semibold tracking-[-0.03em] text-text leading-none">
+      imbass
+    </span>
+  </div>
+);
 
-  const mainMenuItems = [
-    { id: 'Home', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'Dashboard', label: 'Influencers', icon: Users },
-    { id: 'Analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'Collaborations', label: 'Campaigns', icon: MessageSquare },
-    { id: 'Console', label: 'Console', icon: FileText },
-    { id: 'Profile', label: 'Profile', icon: Settings },
-  ];
+const primary = [
+  { id: 'Home', label: 'Dashboard', icon: LayoutGrid },
+];
 
-  const bottomMenuItems = [
-    { label: 'Blog', icon: FileText, action: () => {} },
-    { label: 'Contact Us', icon: Mail, action: () => {} },
-  ];
+const discover: Array<{ id: string; label: string; icon: any }> = [
+  { id: 'Marketplace', label: 'Marketplace', icon: Compass },
+  { id: 'Showcase',    label: 'Showcase',    icon: Award },
+  { id: 'Following',   label: 'Following',   icon: Bookmark },
+];
 
-  const handleNavClick = (id: string) => {
+const workspace: Array<{ id: string; label: string; icon: any; badge?: string }> = [
+  { id: 'Collaborations',label: 'Campaigns',        icon: Handshake },
+  { id: 'Console',       label: 'Negotiations',     icon: MessageSquare },
+  { id: 'Analytics',     label: 'Analytics',        icon: Rocket },
+  { id: 'Reports',       label: 'Reports',          icon: FileText, badge: '3' },
+];
+
+const operations = [
+  { id: 'Disputes', label: 'Disputes', icon: AlertTriangle },
+  { id: 'Billing',  label: 'Billing',  icon: CreditCard },
+  { id: 'Profile',  label: 'Settings', icon: Settings },
+];
+
+const misc = [
+  { id: 'Blog',    label: 'Blog',        icon: BookOpen },
+  { id: 'Contact', label: 'Contact us',  icon: PhoneCall },
+];
+
+const EnterpriseSidebar: React.FC<EnterpriseSidebarProps> = ({
+  activePage, setActivePage, isOpen, onClose,
+}) => {
+  const { logout, user } = useAuth();
+  const { count: followCount } = useFollows();
+  const [langOpen, setLangOpen] = useState(false);
+
+  const onNav = (id: string) => {
     setActivePage(id);
-    if (window.innerWidth <= 768) {
-      onClose();
-    }
+    if (window.innerWidth <= 1024) onClose();
   };
 
   return (
@@ -44,7 +74,7 @@ const EnterpriseSidebar: React.FC<EnterpriseSidebarProps> = ({ activePage, setAc
       {/* Mobile overlay */}
       <div
         className={cn(
-          "fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 lg:hidden",
+          "fixed inset-0 bg-black/60 backdrop-blur-[2px] z-40 transition-opacity duration-300 lg:hidden",
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
         onClick={onClose}
@@ -52,142 +82,197 @@ const EnterpriseSidebar: React.FC<EnterpriseSidebarProps> = ({ activePage, setAc
 
       <aside
         className={cn(
-          "fixed left-0 top-0 h-screen z-50 flex flex-col transition-all duration-300 ease-in-out",
-          "bg-dark-sidebar border-r border-white/[0.06]",
-          collapsed ? "w-[72px]" : "w-[260px]",
+          "fixed left-4 top-4 bottom-4 z-50 w-[224px]",
+          "bg-surface border border-line rounded-[22px] shadow-card",
+          "flex flex-col py-4",
+          "transition-transform duration-300 ease-out overflow-hidden",
           "lg:translate-x-0",
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          isOpen ? "translate-x-0" : "-translate-x-[calc(100%+1rem)] lg:translate-x-0"
         )}
       >
-        {/* Logo */}
-        <div className="flex items-center justify-between px-5 h-16 border-b border-white/[0.06]">
-          {!collapsed && (
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-extrabold text-white tracking-tight">IMBASS</span>
-              <span className="text-[10px] font-bold bg-accent-peach text-dark-500 px-1.5 py-0.5 rounded">PRO</span>
-            </div>
-          )}
+        {/* Header — brand + collapse */}
+        <div className="px-4 flex items-center justify-between">
+          <BrandWord />
           <button
-            onClick={() => {
-              if (window.innerWidth <= 1024) {
-                onClose();
-              } else {
-                setCollapsed(!collapsed);
-              }
-            }}
-            className="p-1.5 rounded-lg text-muted hover:text-white hover:bg-white/5 transition-colors lg:block"
+            onClick={onClose}
+            className="w-7 h-7 grid place-items-center rounded-full border border-line text-text-mute hover:text-text hover:bg-surface-sunk transition"
+            title="Collapse"
+            aria-label="Collapse sidebar"
           >
-            {window.innerWidth <= 1024 ? <X size={18} /> : <ChevronLeft size={18} className={cn(collapsed && "rotate-180 transition-transform")} />}
+            <ChevronLeft size={13} strokeWidth={2} />
           </button>
         </div>
 
-        {/* User */}
-        <div className={cn("px-4 py-4 border-b border-white/[0.06]", collapsed && "px-2 flex justify-center")}>
-          <div className={cn("flex items-center gap-3", collapsed && "flex-col")}>
-            <Avatar className="h-9 w-9 ring-2 ring-accent-peach/30">
-              <AvatarFallback className="bg-accent-peach/20 text-accent-peach text-sm">
-                {user?.email?.charAt(0).toUpperCase() || 'U'}
+        {/* Profile card */}
+        <button
+          onClick={() => onNav('Profile')}
+          className="mx-3 mt-4 p-2.5 rounded-2xl border border-line bg-surface-sunk/60 hover:bg-surface-sunk hover:border-line-strong transition-all group"
+        >
+          <div className="flex items-center gap-2.5">
+            <Avatar className="h-9 w-9 ring-1 ring-white/10">
+              <AvatarFallback className="bg-iris-grad text-white text-[12px]">
+                {user?.email?.charAt(0).toUpperCase() || 'A'}
               </AvatarFallback>
             </Avatar>
-            {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-white truncate">
-                  {user?.email?.split('@')[0] || 'User'}
-                </div>
-                <div className="text-[11px] text-muted truncate">
-                  {user?.role || 'Member'}
-                </div>
+            <div className="flex-1 min-w-0 text-left">
+              <div className="font-sans text-[12.5px] font-semibold text-text truncate leading-tight">
+                {user?.email?.split('@')[0] || 'Anton Avilov'}
               </div>
-            )}
+              <div className="font-sans text-[10.5px] text-text-mute mt-0.5 truncate">
+                {user?.role === 'INFLUENCER' ? 'Creator account' : 'Admin account'}
+              </div>
+            </div>
+            <span className="p-1 text-text-faint group-hover:text-text-mute transition">
+              <MoreVertical size={14} strokeWidth={1.75} />
+            </span>
           </div>
-        </div>
+        </button>
 
-        {/* Main nav */}
-        <nav className="flex-1 py-3 px-2 overflow-y-auto">
-          <div className="space-y-0.5">
-            {mainMenuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activePage === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                    isActive
-                      ? "bg-accent-peach/10 text-accent-peach"
-                      : "text-muted-light hover:text-white hover:bg-white/[0.04]",
-                    collapsed && "justify-center px-2"
-                  )}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <Icon size={19} className={cn(isActive && "text-accent-peach")} />
-                  {!collapsed && <span>{item.label}</span>}
-                  {isActive && !collapsed && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent-peach" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+        {/* Main nav — scrollable */}
+        <nav className="flex-1 overflow-y-auto px-3 mt-4 scrollbar-hide">
+          <NavGroup>
+            {primary.map((it) => (
+              <NavItem
+                key={it.id} icon={it.icon} label={it.label}
+                active={activePage === it.id}
+                onClick={() => onNav(it.id)}
+                variant="primary"
+              />
+            ))}
+          </NavGroup>
+
+          <NavGroup className="mt-3">
+            {discover.map((it) => (
+              <NavItem
+                key={it.id} icon={it.icon} label={it.label}
+                badge={it.id === 'Following' && followCount > 0 ? String(followCount) : undefined}
+                active={activePage === it.id}
+                onClick={() => onNav(it.id)}
+              />
+            ))}
+          </NavGroup>
+
+          <NavGroup className="mt-3">
+            {workspace.map((it) => (
+              <NavItem
+                key={it.id} icon={it.icon} label={it.label} badge={it.badge}
+                active={activePage === it.id}
+                onClick={() => onNav(it.id)}
+              />
+            ))}
+          </NavGroup>
+
+          <Separator />
+
+          <NavGroup>
+            {operations.map((it) => (
+              <NavItem
+                key={it.id} icon={it.icon} label={it.label}
+                active={activePage === it.id}
+                onClick={() => onNav(it.id)}
+              />
+            ))}
+          </NavGroup>
+
+          <Separator />
+
+          <NavGroup>
+            {misc.map((it) => (
+              <NavItem
+                key={it.id} icon={it.icon} label={it.label}
+                active={false}
+                onClick={() => {}}
+              />
+            ))}
+          </NavGroup>
         </nav>
 
-        {/* Bottom section */}
-        <div className="px-2 pb-2 border-t border-white/[0.06] pt-2">
-          {bottomMenuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.label}
-                onClick={item.action}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted hover:text-muted-lighter hover:bg-white/[0.03] transition-colors",
-                  collapsed && "justify-center px-2"
-                )}
-                title={collapsed ? item.label : undefined}
-              >
-                <Icon size={17} />
-                {!collapsed && <span>{item.label}</span>}
-              </button>
-            );
-          })}
-
-          {/* Language toggle */}
-          <div className={cn("flex items-center gap-3 px-3 py-2 mt-1", collapsed && "justify-center px-2")}>
-            <Globe size={17} className="text-muted" />
-            {!collapsed && <span className="text-sm text-muted">Language</span>}
-          </div>
-        </div>
-
-        {/* Need help? */}
-        {!collapsed && (
-          <div className="mx-3 mb-3 p-3 rounded-xl bg-gradient-to-br from-accent-peach/20 to-accent-salmon/10 border border-accent-peach/20">
-            <div className="flex items-center gap-2 mb-1">
-              <HelpCircle size={16} className="text-accent-peach" />
-              <span className="text-sm font-semibold text-white">Need help?</span>
-            </div>
-            <p className="text-[11px] text-muted-light">Our support is 24/7 online</p>
-          </div>
-        )}
-
-        {/* Logout */}
-        <div className="px-2 pb-3">
+        {/* Language + logout row */}
+        <div className="px-3 mt-3">
           <button
-            onClick={logout}
-            className={cn(
-              "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-danger/70 hover:text-danger hover:bg-danger/5 transition-colors",
-              collapsed && "justify-center px-2"
-            )}
-            title={collapsed ? "Logout" : undefined}
+            onClick={() => setLangOpen(v => !v)}
+            className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-surface-sunk transition"
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-            {!collapsed && <span>Logout</span>}
+            <span className="font-sans text-[12px] text-text-mute">Language</span>
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-sunk border border-line text-[11px]">
+                🇺🇸
+              </span>
+              <ChevronDown size={12} className={cn("text-text-faint transition-transform", langOpen && "rotate-180")} />
+            </div>
           </button>
         </div>
+
+        {/* "Need help?" gradient card */}
+        <div className="mx-3 mt-3 relative rounded-2xl p-4 overflow-hidden bg-help-grad">
+          {/* soft highlight */}
+          <span className="absolute -top-6 -left-6 w-20 h-20 rounded-full bg-white/30 blur-2xl" />
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <div className="w-9 h-9 rounded-full bg-[#16181d] text-white grid place-items-center mb-2">
+              <HelpCircle size={17} strokeWidth={1.75} />
+            </div>
+            <div className="font-display text-[14px] font-semibold text-[#1a1d23]">
+              Need help?
+            </div>
+            <div className="font-sans text-[11px] text-[#3a3345] mt-0.5 leading-tight">
+              Our support is 24/7 online
+            </div>
+          </div>
+        </div>
+
+        {/* Logout mini */}
+        <button
+          onClick={logout}
+          className="mx-3 mt-2 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-mute hover:text-down hover:bg-down/10 transition text-[12px] font-medium"
+          title="Sign out"
+        >
+          <LogOut size={13} strokeWidth={1.75} />
+          Sign out
+        </button>
       </aside>
     </>
+  );
+};
+
+/* ─── helpers ─── */
+
+const NavGroup: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
+  <div className={cn("flex flex-col gap-0.5", className)}>{children}</div>
+);
+
+const Separator: React.FC = () => <div className="my-3 h-px bg-line" />;
+
+interface NavItemProps {
+  icon: React.ElementType;
+  label: string;
+  badge?: string;
+  active: boolean;
+  onClick: () => void;
+  variant?: 'primary' | 'default';
+}
+
+const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, badge, active, onClick, variant = 'default' }) => {
+  const isPrimary = variant === 'primary';
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "group relative flex items-center gap-2.5 px-2.5 py-2 rounded-xl w-full transition-all text-left",
+        active
+          ? isPrimary
+            ? "bg-[#0d0f13] text-white border border-white/10 shadow-[0_1px_0_rgba(255,255,255,0.04)_inset]"
+            : "bg-surface-sunk text-text"
+          : "text-text-mute hover:text-text hover:bg-surface-sunk/60"
+      )}
+    >
+      <Icon size={15} strokeWidth={1.75} className={cn(active && isPrimary ? "text-white" : "")} />
+      <span className="font-sans text-[12.5px] font-medium flex-1 truncate">{label}</span>
+      {badge && (
+        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-surface-sunk border border-line text-[10px] font-semibold text-text-soft">
+          {badge}
+        </span>
+      )}
+    </button>
   );
 };
 
