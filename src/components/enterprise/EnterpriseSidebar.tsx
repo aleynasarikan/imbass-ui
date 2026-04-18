@@ -3,7 +3,7 @@ import {
   LayoutGrid, FileText, MessageSquare, Rocket, Handshake,
   AlertTriangle, CreditCard, Settings, BookOpen, PhoneCall,
   ChevronLeft, ChevronDown, MoreVertical, HelpCircle, LogOut,
-  Compass, Award, Bookmark,
+  Compass, Award, Bookmark, Users,
 } from 'lucide-react';
 import { useFollows } from '../../lib/stores/follows';
 import { cn } from '../../lib/utils';
@@ -40,6 +40,7 @@ const discover: Array<{ id: string; label: string; icon: any }> = [
 ];
 
 const workspace: Array<{ id: string; label: string; icon: any; badge?: string }> = [
+  { id: 'Roster',        label: 'Agency Roster',    icon: Users },
   { id: 'Collaborations',label: 'Campaigns',        icon: Handshake },
   { id: 'Console',       label: 'Negotiations',     icon: MessageSquare },
   { id: 'Analytics',     label: 'Analytics',        icon: Rocket },

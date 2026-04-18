@@ -8,12 +8,12 @@ const getMyProfile = async (userId) => {
     if (!profile) {
         throw { statusCode: 404, message: 'Profile not found' };
     }
-    const platformsResult = await (0, db_1.query)('SELECT * FROM platforms WHERE profile_id = $1', [profile.id]);
+    const platformsResult = await (0, db_1.query)('SELECT * FROM social_accounts WHERE profile_id = $1', [profile.id]);
     const platforms = platformsResult.rows;
     const platformsObj = {
-        youtube: platforms.some((p) => p.platform_name === 'YOUTUBE'),
-        instagram: platforms.some((p) => p.platform_name === 'INSTAGRAM'),
-        tiktok: platforms.some((p) => p.platform_name === 'TIKTOK')
+        youtube: platforms.some((p) => p.platform === 'YOUTUBE'),
+        instagram: platforms.some((p) => p.platform === 'INSTAGRAM'),
+        tiktok: platforms.some((p) => p.platform === 'TIKTOK')
     };
     return {
         name: profile.full_name,
@@ -39,7 +39,7 @@ const updateMyProfile = async (userId, data) => {
         }
         await client.query('UPDATE profiles SET full_name = $1, bio = $2, location = $3, contact_email = $4 WHERE user_id = $5', [data.name, data.bio || null, data.location || null, data.email, userId]);
         await client.query('UPDATE users SET email = $1 WHERE id = $2', [data.email, userId]);
-        await client.query('DELETE FROM platforms WHERE profile_id = $1', [profile.id]);
+        await client.query('DELETE FROM social_accounts WHERE profile_id = $1', [profile.id]);
         if (data.platforms) {
             const platformEntries = [
                 { key: 'youtube', name: 'YOUTUBE' },
@@ -48,7 +48,7 @@ const updateMyProfile = async (userId, data) => {
             ];
             for (const p of platformEntries) {
                 if (data.platforms[p.key]) {
-                    await client.query('INSERT INTO platforms (profile_id, platform_name, username) VALUES ($1, $2, $3)', [profile.id, p.name, `User_${p.key}`]);
+                    await client.query('INSERT INTO social_accounts (profile_id, platform, username) VALUES ($1, $2, $3)', [profile.id, p.name, `User_${p.key}`]);
                 }
             }
         }

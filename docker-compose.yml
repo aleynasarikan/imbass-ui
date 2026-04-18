@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15.2-alpine
+    container_name: imbass_postgres
+    environment:
+      POSTGRES_USER: imbass
+      POSTGRES_PASSWORD: imbass123
+      POSTGRES_DB: imbass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U imbass -d imbass"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: server.Dockerfile
+    container_name: imbass_server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5002:5002"
+    environment:
+      DATABASE_URL: postgres://imbass:imbass123@postgres:5432/imbass
+      JWT_SECRET: dev-secret-change-me
+      REFRESH_TOKEN_SECRET: dev-refresh-secret-change-me
+      PORT: 5002
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:

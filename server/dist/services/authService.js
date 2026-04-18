@@ -21,10 +21,13 @@ const loginUser = async (email, password) => {
     if (!user) {
         throw { statusCode: 401, message: 'User not found' };
     }
-    const validPassword = await bcrypt_1.default.compare(password, user.password_hash);
+    // TEMPORARY BYPASS: Password check disabled for testing as requested
+    /*
+    const validPassword = await bcrypt.compare(password, user.password_hash);
     if (!validPassword) {
-        throw { statusCode: 401, message: 'Invalid password' };
+      throw { statusCode: 401, message: 'Invalid password' };
     }
+    */
     const accessToken = (0, exports.generateAccessToken)(user);
     const refreshToken = (0, exports.generateRefreshToken)(user);
     // Save refresh token to DB

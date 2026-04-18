@@ -32,15 +32,18 @@ exports.influencerOnboardingSchema = zod_1.z.object({
     body: zod_1.z.object({
         username: zod_1.z.string().min(1, 'Username is required'),
         socialAccounts: zod_1.z.array(zod_1.z.object({
-            platform: zod_1.z.enum(['YOUTUBE', 'INSTAGRAM', 'TIKTOK', 'youtube', 'instagram', 'tiktok']),
+            platform: zod_1.z.enum([
+                'YOUTUBE', 'INSTAGRAM', 'TIKTOK', 'TWITTER', 'TWITCH', 'STEAM', 'OTHER',
+                'youtube', 'instagram', 'tiktok', 'twitter', 'twitch', 'steam', 'other'
+            ]),
             username: zod_1.z.string().min(1, 'Platform username is required'),
-            profileUrl: zod_1.z.string().url('Invalid URL').optional().or(zod_1.z.literal('')),
+            profileUrl: zod_1.z.string().optional().or(zod_1.z.literal('')).or(zod_1.z.null()),
         })).optional(),
     }),
 });
 exports.agencyOnboardingSchema = zod_1.z.object({
     body: zod_1.z.object({
         companyName: zod_1.z.string().min(1, 'Company name is required'),
-        logoUrl: zod_1.z.string().url('Invalid Logo URL').optional().or(zod_1.z.literal('')),
+        logoUrl: zod_1.z.string().optional().or(zod_1.z.literal('')).or(zod_1.z.null()),
     }),
 });

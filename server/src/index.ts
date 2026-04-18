@@ -11,6 +11,7 @@ import dataRoutes from './routes/dataRoutes';
 import negotiationRoutes from './routes/negotiationRoutes';
 import creatorRoutes from './routes/creatorRoutes';
 import meRoutes from './routes/meRoutes';
+import agencyRoutes from './routes/agencyRoutes';
 
 import { errorHandler } from './middleware/error';
 
@@ -60,6 +61,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/negotiations', negotiationRoutes);
 app.use('/api/creators', creatorRoutes);
 app.use('/api/me', meRoutes);
+app.use('/api/agency', agencyRoutes);
 app.use('/api', dataRoutes); // /api/influencers, /api/campaigns
 
 // 404 Handler

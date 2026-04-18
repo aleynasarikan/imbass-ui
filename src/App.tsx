@@ -16,6 +16,7 @@ import MarketplacePage from './pages/MarketplacePage';
 import CampaignShowcasePage from './pages/CampaignShowcasePage';
 import PublicCreatorProfile from './pages/PublicCreatorProfile';
 import FollowingPage from './pages/FollowingPage';
+import RosterPage from './pages/enterprise/RosterPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Menu } from 'lucide-react';
 
@@ -28,6 +29,7 @@ const PAGES: Record<string, React.ReactElement> = {
   '/analytics': <WeeklyAnalytics />,
   '/campaigns': <AdCollaboration />,
   '/console': <NegotiationConsole />,
+  '/roster': <RosterPage />,
   '/profile': <ProfilePage />,
 };
 
@@ -41,6 +43,7 @@ export const PAGE_TO_PATH: Record<string, string> = {
   Analytics: '/analytics',
   Collaborations: '/campaigns',
   Console: '/console',
+  Roster: '/roster',
   Profile: '/profile',
 };
 

@@ -4,7 +4,7 @@ exports.getClient = exports.query = void 0;
 const pg_1 = require("pg");
 const pool = new pg_1.Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 20, // Concurrency considerations for financial-grade SaaS
+    max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
 });
