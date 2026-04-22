@@ -6,7 +6,6 @@ import EnterpriseSidebar from './components/enterprise/EnterpriseSidebar';
 import ActivityPanel from './components/enterprise/ActivityPanel';
 import EnterpriseDashboard from './pages/enterprise/EnterpriseDashboard';
 import WeeklyAnalytics from './pages/WeeklyAnalytics';
-import AdCollaboration from './pages/AdCollaboration';
 import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -17,34 +16,44 @@ import CampaignShowcasePage from './pages/CampaignShowcasePage';
 import PublicCreatorProfile from './pages/PublicCreatorProfile';
 import FollowingPage from './pages/FollowingPage';
 import RosterPage from './pages/enterprise/RosterPage';
+import CampaignMarketplacePage from './pages/CampaignMarketplacePage';
+import AgencyCampaignsPage from './pages/enterprise/AgencyCampaignsPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+import AgencyLeaderboardPage from './pages/AgencyLeaderboardPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Menu } from 'lucide-react';
 
 /* ─── Route definitions for the authed shell ─── */
 const PAGES: Record<string, React.ReactElement> = {
-  '/dashboard': <EnterpriseDashboard />,
-  '/marketplace': <MarketplacePage />,
-  '/showcase': <CampaignShowcasePage />,
-  '/following': <FollowingPage />,
-  '/analytics': <WeeklyAnalytics />,
-  '/campaigns': <AdCollaboration />,
-  '/console': <NegotiationConsole />,
-  '/roster': <RosterPage />,
-  '/profile': <ProfilePage />,
+  '/dashboard':    <EnterpriseDashboard />,
+  '/marketplace':  <MarketplacePage />,
+  '/showcase':     <CampaignShowcasePage />,
+  '/leaderboard':  <LeaderboardPage />,
+  '/agencies':     <AgencyLeaderboardPage />,
+  '/following':    <FollowingPage />,
+  '/analytics':    <WeeklyAnalytics />,
+  '/campaigns':    <CampaignMarketplacePage />,
+  '/my-campaigns': <AgencyCampaignsPage />,
+  '/console':      <NegotiationConsole />,
+  '/roster':       <RosterPage />,
+  '/profile':      <ProfilePage />,
 };
 
 /* map sidebar activePage id → URL path */
 export const PAGE_TO_PATH: Record<string, string> = {
-  Home: '/dashboard',
-  Dashboard: '/dashboard',
-  Marketplace: '/marketplace',
-  Showcase: '/showcase',
-  Following: '/following',
-  Analytics: '/analytics',
+  Home:           '/dashboard',
+  Dashboard:      '/dashboard',
+  Marketplace:    '/marketplace',
+  Showcase:       '/showcase',
+  Leaderboard:    '/leaderboard',
+  Agencies:       '/agencies',
+  Following:      '/following',
+  Analytics:      '/analytics',
   Collaborations: '/campaigns',
-  Console: '/console',
-  Roster: '/roster',
-  Profile: '/profile',
+  MyCampaigns:    '/my-campaigns',
+  Console:        '/console',
+  Roster:         '/roster',
+  Profile:        '/profile',
 };
 
 const PATH_TO_PAGE: Record<string, string> = Object.entries(PAGE_TO_PATH).reduce((acc, [page, path]) => {

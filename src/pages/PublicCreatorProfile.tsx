@@ -11,6 +11,8 @@ import ActivityHeatmap from '../components/creator/ActivityHeatmap';
 import CreatorLevelBadge from '../components/creator/CreatorLevelBadge';
 import TrustScoreBadge from '../components/creator/TrustScoreBadge';
 import FollowButton from '../components/creator/FollowButton';
+import RevenueHeatmap from '../components/creator/RevenueHeatmap';
+import BadgesPanel from '../components/creator/BadgesPanel';
 import {
   CREATORS, formatFollowers, getCreatorBySlug as mockBySlug,
   dtoToMockCreator, CreatorPlatform, MockCreator,
@@ -199,6 +201,9 @@ const PublicCreatorProfile: React.FC<PublicCreatorProfileProps> = ({ slug }) => 
           </div>
         </section>
 
+        {/* Badges (Sprint 4) */}
+        <BadgesPanel slug={creator.slug} className="mb-5 animate-rise-in" style={{ animationDelay: '45ms' }} />
+
         {/* Activity heatmap */}
         <section className="surface p-6 mb-5 animate-rise-in" style={{ animationDelay: '60ms' }}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
@@ -209,7 +214,20 @@ const PublicCreatorProfile: React.FC<PublicCreatorProfileProps> = ({ slug }) => 
               </p>
             </div>
           </div>
-          <ActivityHeatmap year={new Date().getFullYear()} metric="collab" />
+          <ActivityHeatmap slug={creator.slug} year={new Date().getFullYear()} metric="collab" />
+        </section>
+
+        {/* Revenue heatmap (Sprint 5) */}
+        <section className="surface p-6 mb-5 animate-rise-in" style={{ animationDelay: '90ms' }}>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <div>
+              <h2 className="font-display text-[16px] font-semibold text-text">Revenue</h2>
+              <p className="font-sans text-[12px] text-text-mute mt-0.5">
+                Monthly earnings from released milestones — the public $ track record.
+              </p>
+            </div>
+          </div>
+          <RevenueHeatmap slug={creator.slug} year={new Date().getFullYear()} />
         </section>
 
         {/* 2-col: About + Platforms | Contact + Rate */}

@@ -276,7 +276,7 @@ const CreatorDetailDrawer: React.FC<{
   onClose: () => void;
   onOpenProfile: () => void;
 }> = ({ creator, onClose, onOpenProfile }) => (
-  <div className="fixed inset-0 z-40 flex items-end md:items-center justify-center p-4 md:p-6 animate-fade-in">
+  <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-4 md:p-6 animate-fade-in isolate">
     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
     <div className="relative surface w-full max-w-[560px] p-6 max-h-[88vh] overflow-y-auto">
       <button

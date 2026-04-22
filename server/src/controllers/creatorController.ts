@@ -62,3 +62,61 @@ export const listMyFollows = catchAsync(async (req: AuthRequest, res: Response) 
   const data = await creatorService.listFollowedCreators(followerId);
   res.json(data);
 });
+
+/* ─── Sprint 4: activity, leaderboard, availability ─── */
+
+/** GET /api/creators/:slug/activity?year=2026 — public daily activity */
+export const getCreatorActivity = catchAsync(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  if (!slug) return res.status(400).json({ message: 'Missing slug' });
+
+  const creator = await creatorService.getCreatorBySlug(slug);
+  if (!creator) return res.status(404).json({ message: 'Creator not found' });
+
+  const yearParam = req.query.year;
+  const year = typeof yearParam === 'string' ? parseInt(yearParam, 10) : new Date().getFullYear();
+  if (!Number.isFinite(year) || year < 2000 || year > 2100) {
+    return res.status(400).json({ message: 'Invalid year' });
+  }
+
+  const data = await creatorService.getActivityForUser(creator.userId, year);
+  res.json(data);
+});
+
+/** GET /api/creators/leaderboard — public ranked list of creators */
+export const getLeaderboard = catchAsync(async (req: Request, res: Response) => {
+  const limitParam = req.query.limit;
+  const limit = typeof limitParam === 'string' ? Math.min(100, parseInt(limitParam, 10)) : 25;
+  const data = await creatorService.leaderboard(Number.isFinite(limit) && limit > 0 ? limit : 25);
+  res.json(data);
+});
+
+/** PATCH /api/me/availability — INFLUENCER toggles is_available on their profile */
+export const setMyAvailability = catchAsync(async (req: AuthRequest, res: Response) => {
+  if (req.user.role !== 'INFLUENCER') {
+    return res.status(403).json({ message: 'Only creators have an availability flag' });
+  }
+  const { available } = req.body ?? {};
+  if (typeof available !== 'boolean') {
+    return res.status(400).json({ message: 'available must be a boolean' });
+  }
+  const ok = await creatorService.setAvailability(req.user.id, available);
+  if (!ok && ok !== false) return res.status(404).json({ message: 'Profile not found' });
+  res.json({ isAvailable: ok });
+});
+
+/** POST /api/creators/:slug/recompute — recompute XP/trust for a creator.
+ *  Agencies can trigger this for any creator on their roster; the creator
+ *  themselves can always recompute their own stats. */
+export const recomputeCreator = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { slug } = req.params;
+  const creator = await creatorService.getCreatorBySlug(slug);
+  if (!creator) return res.status(404).json({ message: 'Creator not found' });
+
+  if (req.user.id !== creator.userId && req.user.role !== 'AGENCY') {
+    return res.status(403).json({ message: 'Not allowed' });
+  }
+  await creatorService.recomputeLevel(creator.userId);
+  const updated = await creatorService.getCreatorBySlug(slug);
+  res.json(updated);
+});

@@ -3,7 +3,7 @@ import {
   LayoutGrid, FileText, MessageSquare, Rocket, Handshake,
   AlertTriangle, CreditCard, Settings, BookOpen, PhoneCall,
   ChevronLeft, ChevronDown, MoreVertical, HelpCircle, LogOut,
-  Compass, Award, Bookmark, Users,
+  Compass, Award, Bookmark, Users, Trophy,
 } from 'lucide-react';
 import { useFollows } from '../../lib/stores/follows';
 import { cn } from '../../lib/utils';
@@ -36,11 +36,16 @@ const primary = [
 const discover: Array<{ id: string; label: string; icon: any }> = [
   { id: 'Marketplace', label: 'Marketplace', icon: Compass },
   { id: 'Showcase',    label: 'Showcase',    icon: Award },
+  { id: 'Leaderboard', label: 'Creators',    icon: Trophy },
+  { id: 'Agencies',    label: 'Agencies',    icon: Handshake },
   { id: 'Following',   label: 'Following',   icon: Bookmark },
 ];
 
-const workspace: Array<{ id: string; label: string; icon: any; badge?: string }> = [
-  { id: 'Roster',        label: 'Agency Roster',    icon: Users },
+type WorkspaceItem = { id: string; label: string; icon: any; badge?: string; agencyOnly?: boolean };
+
+const workspace: WorkspaceItem[] = [
+  { id: 'Roster',        label: 'Agency Roster',    icon: Users, agencyOnly: true },
+  { id: 'MyCampaigns',   label: 'My Campaigns',     icon: Handshake, agencyOnly: true },
   { id: 'Collaborations',label: 'Campaigns',        icon: Handshake },
   { id: 'Console',       label: 'Negotiations',     icon: MessageSquare },
   { id: 'Analytics',     label: 'Analytics',        icon: Rocket },
@@ -154,13 +159,15 @@ const EnterpriseSidebar: React.FC<EnterpriseSidebarProps> = ({
           </NavGroup>
 
           <NavGroup className="mt-3">
-            {workspace.map((it) => (
-              <NavItem
-                key={it.id} icon={it.icon} label={it.label} badge={it.badge}
-                active={activePage === it.id}
-                onClick={() => onNav(it.id)}
-              />
-            ))}
+            {workspace
+              .filter(it => !it.agencyOnly || user?.role === 'AGENCY')
+              .map((it) => (
+                <NavItem
+                  key={it.id} icon={it.icon} label={it.label} badge={it.badge}
+                  active={activePage === it.id}
+                  onClick={() => onNav(it.id)}
+                />
+              ))}
           </NavGroup>
 
           <Separator />

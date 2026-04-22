@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS agency_notes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_agency_notes_agency_creator ON agency_notes(agency_id, creator_id);
+DROP TRIGGER IF EXISTS trg_agency_notes_updated_at ON agency_notes;
 CREATE TRIGGER trg_agency_notes_updated_at BEFORE UPDATE ON agency_notes FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ── tasks: Task/Todo management for campaigns & creators ──────────────────────
@@ -82,6 +83,7 @@ CREATE INDEX IF NOT EXISTS idx_tasks_agency    ON tasks(agency_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_creator   ON tasks(creator_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_campaign  ON tasks(campaign_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_assignee  ON tasks(assignee_id);
+DROP TRIGGER IF EXISTS trg_tasks_updated_at ON tasks;
 CREATE TRIGGER trg_tasks_updated_at BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 COMMIT;

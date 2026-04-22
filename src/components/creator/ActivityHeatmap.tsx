@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { cn } from '../../lib/utils';
+import { getCreatorActivity } from '../../api/creators';
 
 export interface ActivityDay {
   date: string; // YYYY-MM-DD
@@ -7,7 +8,11 @@ export interface ActivityDay {
 }
 
 interface ActivityHeatmapProps {
+  /** Explicit daily data (overrides all other sources) */
   data?: ActivityDay[];
+  /** Creator slug — when provided, the component fetches real activity from the API
+   *  and falls back to deterministic mock if the request fails. */
+  slug?: string;
   year?: number;
   className?: string;
   /** "collab" | "content" — changes label copy */
@@ -51,11 +56,29 @@ function mulberry32(seed: number) {
 }
 
 const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
-  data, year = new Date().getFullYear(), className, metric = 'collab',
+  data, slug, year = new Date().getFullYear(), className, metric = 'collab',
 }) => {
   const [hover, setHover] = useState<{ x: number; y: number; day: ActivityDay } | null>(null);
+  const [fetched, setFetched] = useState<ActivityDay[] | null>(null);
 
-  const activity = useMemo(() => data ?? generateMockActivity(year), [data, year]);
+  useEffect(() => {
+    if (data || !slug) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await getCreatorActivity(slug, year);
+        if (!cancelled) setFetched(res);
+      } catch {
+        // fall through to mock
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [data, slug, year]);
+
+  const activity = useMemo(
+    () => data ?? fetched ?? generateMockActivity(year),
+    [data, fetched, year],
+  );
 
   // Build a grid: 53 columns (weeks) × 7 rows (days). Each cell = ActivityDay | null.
   const grid = useMemo(() => {

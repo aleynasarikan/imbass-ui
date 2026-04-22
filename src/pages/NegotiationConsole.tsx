@@ -5,10 +5,11 @@ import { Avatar, AvatarFallback } from '../components/ui/Avatar';
 import { useAuth } from '../context/AuthContext';
 import {
   Check, X, Gavel, Inbox, Clock, ArrowRightLeft, CheckCircle2, XCircle,
-  Search, MoreHorizontal,
+  Search, MoreHorizontal, Wifi,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import api from '../api';
+import { useSocket } from '../hooks/useSocket';
 
 interface Negotiation {
   id: string;
@@ -57,6 +58,24 @@ const NegotiationConsole: React.FC = () => {
   };
 
   useEffect(() => { fetchNegotiations(); }, []);
+
+  /* ── Sprint 3: Real-time negotiation updates via Socket.IO ── */
+  const socket = useSocket();
+  const [liveUpdate, setLiveUpdate] = useState(false);
+  useEffect(() => {
+    if (!socket) return;
+    const handler = (payload: { negotiationId: string; event: string; negotiation: Negotiation }) => {
+      // Optimistically update the specific negotiation in state
+      setNegotiations(prev =>
+        prev.map(n => n.id === payload.negotiationId ? { ...n, ...payload.negotiation } : n)
+      );
+      // Flash the live badge briefly
+      setLiveUpdate(true);
+      setTimeout(() => setLiveUpdate(false), 3000);
+    };
+    socket.on('negotiation:update', handler);
+    return () => { socket.off('negotiation:update', handler); };
+  }, [socket]);
 
   const counts = useMemo(() => ({
     ALL:       negotiations.length,
@@ -135,6 +154,17 @@ const NegotiationConsole: React.FC = () => {
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-iris-soft text-iris-deep text-[11px] font-medium rounded-full">
               {counts.ALL} open
             </span>
+            {socket?.connected && (
+              <span className={cn(
+                'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-medium transition-all',
+                liveUpdate
+                  ? 'bg-up/15 text-up animate-pulse'
+                  : 'bg-surface-sunk text-text-faint'
+              )}>
+                <Wifi size={10} strokeWidth={2} />
+                {liveUpdate ? 'Live update' : 'Live'}
+              </span>
+            )}
           </div>
           <p className="font-sans text-[14px] text-text-mute mt-1.5 max-w-xl">
             Offers, counters, and closes — every exchange tracked in one place.

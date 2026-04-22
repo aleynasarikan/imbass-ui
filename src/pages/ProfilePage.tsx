@@ -12,6 +12,7 @@ import api from '../api';
 import ActivityHeatmap from '../components/creator/ActivityHeatmap';
 import CreatorLevelBadge from '../components/creator/CreatorLevelBadge';
 import TrustScoreBadge from '../components/creator/TrustScoreBadge';
+import { setMyAvailability } from '../api/creators';
 
 interface ProfileData {
   id: string;
@@ -22,6 +23,7 @@ interface ProfileData {
   bio?: string;
   location?: string;
   contactEmail?: string;
+  isAvailable?: boolean;
   platforms?: {
     youtube?: boolean;
     instagram?: boolean;
@@ -230,13 +232,23 @@ const ProfilePage: React.FC = () => {
         {/* Creator level band — influencers only */}
         {isInfluencer && (
           <div className="px-6 pb-6">
-            <div className="surface-sunk p-4 flex items-center gap-4">
-              <CreatorLevelBadge xp={2180} className="flex-1" />
+            <div className="surface-sunk p-4 flex items-center gap-4 flex-wrap">
+              <CreatorLevelBadge xp={2180} className="flex-1 min-w-[240px]" />
               <div className="hidden md:block h-10 w-px bg-line" />
               <div className="hidden md:flex items-center gap-2 text-text-mute">
                 <Flame size={14} className="text-peach" strokeWidth={2} />
                 <span className="font-sans text-[12.5px] font-medium text-text">14-day streak</span>
               </div>
+              <div className="hidden md:block h-10 w-px bg-line" />
+              <AvailabilityToggle
+                value={editForm.isAvailable ?? true}
+                onChange={async (v) => {
+                  const updated = { ...editForm, isAvailable: v };
+                  setEditForm(updated);
+                  setProfile(updated);
+                  try { await setMyAvailability(v); } catch { /* silent */ }
+                }}
+              />
             </div>
           </div>
         )}
@@ -405,6 +417,26 @@ const ProfilePage: React.FC = () => {
     </form>
   );
 };
+
+/* Availability toggle — influencer-facing switch */
+const AvailabilityToggle: React.FC<{ value: boolean; onChange: (v: boolean) => void | Promise<void> }> = ({ value, onChange }) => (
+  <button
+    type="button"
+    onClick={() => onChange(!value)}
+    aria-pressed={value}
+    className={cn(
+      'inline-flex items-center gap-2 h-9 px-3 rounded-full border font-sans text-[12px] font-semibold transition-all',
+      value
+        ? 'bg-up/14 text-up border-up/30'
+        : 'bg-surface-sunk text-text-mute border-line hover:border-line-strong',
+    )}
+  >
+    <span className={cn('w-8 h-5 rounded-full relative transition-colors', value ? 'bg-up' : 'bg-surface-raised')}>
+      <span className={cn('absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-soft transition-transform', value && 'translate-x-3')} />
+    </span>
+    {value ? 'Available for work' : 'Not taking briefs'}
+  </button>
+);
 
 /* Small inline editable field */
 const Field: React.FC<{

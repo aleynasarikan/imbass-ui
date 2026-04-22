@@ -4,10 +4,10 @@ import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/influencers', requireAuth, dataController.getInfluencers);
-router.get('/campaigns', requireAuth, dataController.getCampaigns);
-router.get('/campaigns/dashboard', requireAuth, dataController.getCampaignsDashboard);
-router.post('/campaigns', requireAuth, dataController.createCampaign);
-router.post('/campaigns/:id/apply', requireAuth, dataController.applyCampaign);
+// `/campaigns/*` handling migrated to campaignRoutes (Sprint 3).
+// This router now only owns the non-colliding legacy endpoint for the
+// agency dashboard's campaign tiles.
+router.get('/influencers',          requireAuth, dataController.getInfluencers);
+router.get('/dashboard/campaigns',  requireAuth, dataController.getCampaignsDashboard);
 
 export default router;

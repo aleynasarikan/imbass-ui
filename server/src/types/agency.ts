@@ -1,5 +1,3 @@
-import { UserRole } from './index';
-
 export type AgencyRelationStatus = 'INVITED' | 'ACCEPTED' | 'REJECTED' | 'TERMINATED';
 export type AgencyMemberRole = 'ADMIN' | 'MANAGER' | 'EDITOR';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE' | 'CANCELLED';

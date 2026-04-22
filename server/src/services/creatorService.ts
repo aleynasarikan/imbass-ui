@@ -181,6 +181,107 @@ export const listFollowedCreators = async (followerId: string): Promise<PublicCr
   return res.rows.map(mapRow);
 };
 
+/* ─── Activity heatmap (Sprint 4) ─── */
+
+export interface ActivityPoint {
+  date: string;   // YYYY-MM-DD
+  count: number;
+}
+
+/**
+ * Daily activity aggregate for a creator — counts every event that shows the
+ * creator was engaged that day: applications created, applications reviewed,
+ * and negotiation events they were the actor on.
+ */
+export const getActivityForUser = async (userId: string, year: number): Promise<ActivityPoint[]> => {
+  const res = await query(`
+    SELECT d::date AS date, COALESCE(SUM(n), 0)::INTEGER AS count
+    FROM (
+      SELECT date_trunc('day', created_at)::date AS d, 1 AS n
+        FROM applications
+       WHERE influencer_id = $1
+         AND EXTRACT(YEAR FROM created_at) = $2
+      UNION ALL
+      SELECT date_trunc('day', reviewed_at)::date AS d, 1 AS n
+        FROM applications
+       WHERE influencer_id = $1 AND reviewed_at IS NOT NULL
+         AND EXTRACT(YEAR FROM reviewed_at) = $2
+      UNION ALL
+      SELECT date_trunc('day', created_at)::date AS d, 1 AS n
+        FROM negotiation_events
+       WHERE actor_id = $1
+         AND EXTRACT(YEAR FROM created_at) = $2
+    ) events
+    GROUP BY d
+    ORDER BY d
+  `, [userId, year]);
+  return res.rows.map(r => ({
+    date: new Date(r.date).toISOString().slice(0, 10),
+    count: Number(r.count),
+  }));
+};
+
+/* ─── Leaderboard (Sprint 4) ─── */
+
+export interface LeaderboardEntry extends PublicCreatorDTO {
+  rank: number;
+  acceptedApplications: number;
+  completedCampaigns: number;
+}
+
+export const leaderboard = async (limit = 25): Promise<LeaderboardEntry[]> => {
+  const res = await query(`
+    SELECT
+      p.id, p.user_id, p.slug, p.full_name, p.bio, p.location, p.niche,
+      p.is_available, p.is_verified, p.trust_score, p.xp, p.avatar_url,
+      u.role,
+      COALESCE(
+        (SELECT json_agg(json_build_object(
+            'platform', sa.platform, 'username', sa.username,
+            'followerCount', sa.follower_count, 'profileUrl', sa.profile_url))
+         FROM social_accounts sa WHERE sa.profile_id = p.id),
+        '[]'::json
+      ) AS platforms,
+      COALESCE(
+        (SELECT SUM(follower_count)::BIGINT FROM social_accounts sa WHERE sa.profile_id = p.id),
+        0
+      ) AS follower_count,
+      (SELECT COUNT(*) FROM applications a WHERE a.influencer_id = u.id AND a.status = 'ACCEPTED')::INTEGER AS accepted_apps,
+      (SELECT COUNT(DISTINCT a.campaign_id) FROM applications a
+        JOIN campaigns c ON c.id = a.campaign_id
+       WHERE a.influencer_id = u.id AND a.status = 'ACCEPTED' AND c.status = 'SETTLED')::INTEGER AS completed
+    FROM profiles p
+    JOIN users u ON u.id = p.user_id
+    WHERE u.role = 'INFLUENCER' AND p.slug IS NOT NULL
+    ORDER BY p.xp DESC, p.trust_score DESC, p.full_name ASC
+    LIMIT $1
+  `, [limit]);
+
+  return res.rows.map((r, i) => ({
+    ...mapRow(r),
+    rank: i + 1,
+    acceptedApplications: Number(r.accepted_apps) || 0,
+    completedCampaigns:   Number(r.completed) || 0,
+  }));
+};
+
+/* ─── Recompute trigger (Sprint 4) ─── */
+
+export const recomputeLevel = async (userId: string): Promise<void> => {
+  await query(`SELECT recompute_creator_level($1)`, [userId]);
+};
+
+/* ─── Availability (Sprint 4) ─── */
+
+export const setAvailability = async (userId: string, available: boolean): Promise<boolean> => {
+  const res = await query(
+    `UPDATE profiles SET is_available = $1 WHERE user_id = $2 RETURNING is_available`,
+    [available, userId],
+  );
+  if (res.rowCount === 0) return false;
+  return res.rows[0].is_available;
+};
+
 /* ─── mapper ─── */
 function mapRow(r: any): PublicCreatorDTO {
   return {

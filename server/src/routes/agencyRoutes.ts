@@ -1,20 +1,25 @@
 import { Router } from 'express';
 import * as agencyController from '../controllers/agencyController';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
 
 router.use(requireAuth);
 
-router.post('/invite', agencyController.inviteCreator);
-router.post('/respond', agencyController.respondToInvitation);
-router.get('/roster', agencyController.getRoster);
+/* ── AGENCY-only endpoints ─────────────────────────────── */
+const agencyOnly = requireRole('AGENCY');
 
-router.post('/notes', agencyController.addNote);
-router.get('/notes/:creatorId', agencyController.getNotes);
+router.post('/invite',          agencyOnly, agencyController.inviteCreator);
+router.get ('/roster',          agencyOnly, agencyController.getRoster);
 
-router.post('/tasks', agencyController.createTask);
-router.get('/tasks', agencyController.getTasks);
-router.patch('/tasks/:id', agencyController.updateTaskStatus);
+router.post('/notes',           agencyOnly, agencyController.addNote);
+router.get ('/notes/:creatorId',agencyOnly, agencyController.getNotes);
+
+router.post ('/tasks',          agencyOnly, agencyController.createTask);
+router.get  ('/tasks',          agencyOnly, agencyController.getTasks);
+router.patch('/tasks/:id',      agencyOnly, agencyController.updateTaskStatus);
+
+/* ── INFLUENCER-only ──────────────────────────────────── */
+router.post('/respond',         requireRole('INFLUENCER'), agencyController.respondToInvitation);
 
 export default router;

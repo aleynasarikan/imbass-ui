@@ -60,3 +60,59 @@ export async function listMyFollows(): Promise<CreatorDTO[]> {
   const res = await api.get<CreatorDTO[]>('/me/follows');
   return res.data;
 }
+
+/* ─── Sprint 4: activity, leaderboard, availability ─── */
+
+export interface ActivityPoint {
+  date: string;   // YYYY-MM-DD
+  count: number;
+}
+
+export async function getCreatorActivity(slug: string, year?: number): Promise<ActivityPoint[]> {
+  const res = await api.get<ActivityPoint[]>(`/creators/${encodeURIComponent(slug)}/activity`, {
+    params: year ? { year } : undefined,
+  });
+  return res.data;
+}
+
+export interface LeaderboardEntryDTO extends CreatorDTO {
+  rank: number;
+  acceptedApplications: number;
+  completedCampaigns: number;
+}
+
+export async function getLeaderboard(limit = 25): Promise<LeaderboardEntryDTO[]> {
+  const res = await api.get<LeaderboardEntryDTO[]>('/creators/leaderboard', { params: { limit } });
+  return res.data;
+}
+
+export async function setMyAvailability(available: boolean): Promise<{ isAvailable: boolean }> {
+  const res = await api.patch<{ isAvailable: boolean }>('/me/availability', { available });
+  return res.data;
+}
+
+export async function recomputeCreator(slug: string): Promise<CreatorDTO> {
+  const res = await api.post<CreatorDTO>(`/creators/${encodeURIComponent(slug)}/recompute`);
+  return res.data;
+}
+
+/* ─── Sprint 4: Badges ─── */
+
+export interface BadgeDTO {
+  creatorId: string;
+  badgeCode: string;
+  awardedAt: string;
+}
+
+export const BADGE_META: Record<string, { label: string; emoji: string; description: string }> = {
+  FIRST_DEAL:     { label: 'First Deal',  emoji: '🤝', description: 'Completed your first collaboration' },
+  CAMPAIGN_5:     { label: 'Rising Star', emoji: '⭐', description: 'Completed 5 campaigns successfully' },
+  TRUSTED:        { label: 'Trusted',     emoji: '🛡️', description: 'Trust score reached 80 or above' },
+  ON_TIME_STREAK: { label: 'On-Time Pro', emoji: '⚡', description: '10 milestones delivered on time' },
+  TOP_10:         { label: 'Top Creator', emoji: '🏆', description: 'Ranked in the top 10 leaderboard' },
+};
+
+export async function getCreatorBadges(slug: string): Promise<BadgeDTO[]> {
+  const res = await api.get<BadgeDTO[]>(`/creators/${encodeURIComponent(slug)}/badges`);
+  return res.data;
+}
