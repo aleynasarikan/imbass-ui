@@ -29,7 +29,8 @@ const NotesDrawer: React.FC<Props> = ({ member, onClose }) => {
     }
   };
 
-  useEffect(() => { void fetchNotes(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [member.creator_id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void fetchNotes(); }, [member.creator_id]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

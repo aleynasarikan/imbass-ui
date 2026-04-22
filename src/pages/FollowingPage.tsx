@@ -16,7 +16,10 @@ const FollowingPage: React.FC = () => {
 
   // Build a hybrid catalog: API follows ∪ API list ∪ mock list, keyed by slug
   const [catalog, setCatalog] = useState<Record<string, MockCreator>>(() =>
-    CREATORS.reduce((acc, c) => (acc[c.slug] = c, acc), {} as Record<string, MockCreator>)
+    CREATORS.reduce((acc, c) => {
+      acc[c.slug] = c;
+      return acc;
+    }, {} as Record<string, MockCreator>)
   );
 
   useEffect(() => {

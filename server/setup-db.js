@@ -597,6 +597,17 @@ async function setup() {
         }
         console.log('✅ Triggers');
 
+        // ── Security (RLS) ──────────────────────────────────────────────────
+        const rlsTables = [
+            'users', 'profiles', 'social_accounts', 'campaigns', 
+            'negotiations', 'negotiation_events', 'accounts', 
+            'ledger_transactions', 'ledger_entries'
+        ];
+        for (const table of rlsTables) {
+            await client.query(`ALTER TABLE ${table} ENABLE ROW LEVEL SECURITY;`);
+        }
+        console.log('✅ Row Level Security');
+
         await client.query('COMMIT');
         console.log('\n🏗️  Schema creation complete!\n');
 

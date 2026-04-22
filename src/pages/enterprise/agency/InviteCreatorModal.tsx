@@ -4,7 +4,7 @@ import { Button } from '../../../components/ui/Button';
 import { Avatar, AvatarFallback } from '../../../components/ui/Avatar';
 import { listCreators, CreatorDTO } from '../../../api/creators';
 import { inviteCreator, RosterMember } from '../../../api/agency';
-import { cn } from '../../../lib/utils';
+// unused imports removed
 
 interface Props {
   existingRoster: RosterMember[];
@@ -181,7 +181,6 @@ const InviteCreatorModal: React.FC<Props> = ({ existingRoster, onClose, onInvite
   );
 };
 
-/* unused prop silencer */
-const _ = cn;
+/* unused prop silencer removed */
 
 export default InviteCreatorModal;

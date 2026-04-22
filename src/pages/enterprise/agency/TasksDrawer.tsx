@@ -48,7 +48,8 @@ const TasksDrawer: React.FC<Props> = ({ member, onClose }) => {
     }
   };
 
-  useEffect(() => { void fetchTasks(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [member.creator_id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void fetchTasks(); }, [member.creator_id]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

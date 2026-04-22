@@ -44,7 +44,8 @@ const AgencyCampaignsPage: React.FC = () => {
     }
   };
 
-  useEffect(() => { void fetchOwn(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void fetchOwn(); }, [user?.id]);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -381,7 +382,8 @@ const CampaignApplicationsDrawer: React.FC<{
       setLoading(false);
     }
   };
-  useEffect(() => { void fetch(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [campaign.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void fetch(); }, [campaign.id]);
 
   const review = async (appId: string, action: 'accept' | 'reject') => {
     setPending(appId);
